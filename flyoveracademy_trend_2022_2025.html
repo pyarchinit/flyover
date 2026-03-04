@@ -1,410 +1,431 @@
-import { useState } from "react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, Cell, PieChart, Pie } from "recharts";
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flyover Academy — Trend Vendite 2022-2025</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0f0f1a; color: #ccc; font-family: 'Outfit', 'Segoe UI', sans-serif; }
+    #root { min-height: 100vh; }
+    table { border-collapse: collapse; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
-const data = {
-  yearly: [
-    { anno: "2021", vendite_lorde: null, vendite_nette: 9366.50, totale_vendite: null, imposte: null, codici_promo: null, resi: null },
-    { anno: "2022", vendite_lorde: 23992.70, vendite_nette: 22743.37, totale_vendite: 27681.38, imposte: 4938.01, codici_promo: 1249.33, resi: 0 },
-    { anno: "2023", vendite_lorde: 12324.80, vendite_nette: 11401.90, totale_vendite: 13888.28, imposte: 2486.38, codici_promo: 922.90, resi: 0 },
-    { anno: "2024", vendite_lorde: 17703.30, vendite_nette: 14397.30, totale_vendite: 17519.89, imposte: 3122.59, codici_promo: 3207.00, resi: 99.00 },
-    { anno: "2025", vendite_lorde: 23411.20, vendite_nette: 22051.57, totale_vendite: 26763.81, imposte: 4712.24, codici_promo: 1359.63, resi: 0 },
-  ],
-  yoy: [
-    { anno: "2022", vendite_nette_yoy: 143, vendite_lorde_yoy: 136, totale_yoy: 165 },
-    { anno: "2023", vendite_nette_yoy: -50, vendite_lorde_yoy: -49, totale_yoy: -50 },
-    { anno: "2024", vendite_nette_yoy: 26, vendite_lorde_yoy: 44, totale_yoy: 26 },
-    { anno: "2025", vendite_nette_yoy: 53, vendite_lorde_yoy: 32, totale_yoy: 53 },
-  ],
-  promoImpact: [
-    { anno: "2022", promo_pct: (1249.33 / 23992.70 * 100).toFixed(1), promo: 1249.33, lorde: 23992.70 },
-    { anno: "2023", promo_pct: (922.90 / 12324.80 * 100).toFixed(1), promo: 922.90, lorde: 12324.80 },
-    { anno: "2024", promo_pct: (3207.00 / 17703.30 * 100).toFixed(1), promo: 3207.00, lorde: 17703.30 },
-    { anno: "2025", promo_pct: (1359.63 / 23411.20 * 100).toFixed(1), promo: 1359.63, lorde: 23411.20 },
-  ],
-  marginAnalysis: [
-    { anno: "2022", nette: 22743.37, lorde: 23992.70, erosione: 23992.70 - 22743.37, erosione_pct: ((23992.70 - 22743.37) / 23992.70 * 100).toFixed(1) },
-    { anno: "2023", nette: 11401.90, lorde: 12324.80, erosione: 12324.80 - 11401.90, erosione_pct: ((12324.80 - 11401.90) / 12324.80 * 100).toFixed(1) },
-    { anno: "2024", nette: 14397.30, lorde: 17703.30, erosione: 17703.30 - 14397.30, erosione_pct: ((17703.30 - 14397.30) / 17703.30 * 100).toFixed(1) },
-    { anno: "2025", nette: 22051.57, lorde: 23411.20, erosione: 23411.20 - 22051.57, erosione_pct: ((23411.20 - 22051.57) / 23411.20 * 100).toFixed(1) },
-  ],
-};
+  <script type="text/babel">
+    const { useState } = React;
+    const {
+      LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+      Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, Cell
+    } = Recharts;
 
-const CAGR = ((22051.57 / 9366.50) ** (1 / 4) - 1) * 100;
+    const data = {
+      yearly: [
+        { anno: "2021", vendite_lorde: null, vendite_nette: 9366.50, totale_vendite: null, imposte: null, codici_promo: null, resi: null },
+        { anno: "2022", vendite_lorde: 23992.70, vendite_nette: 22743.37, totale_vendite: 27681.38, imposte: 4938.01, codici_promo: 1249.33, resi: 0 },
+        { anno: "2023", vendite_lorde: 12324.80, vendite_nette: 11401.90, totale_vendite: 13888.28, imposte: 2486.38, codici_promo: 922.90, resi: 0 },
+        { anno: "2024", vendite_lorde: 17703.30, vendite_nette: 14397.30, totale_vendite: 17519.89, imposte: 3122.59, codici_promo: 3207.00, resi: 99.00 },
+        { anno: "2025", vendite_lorde: 23411.20, vendite_nette: 22051.57, totale_vendite: 26763.81, imposte: 4712.24, codici_promo: 1359.63, resi: 0 },
+      ],
+      yoy: [
+        { anno: "2022", vendite_nette_yoy: 143, vendite_lorde_yoy: 136, totale_yoy: 165 },
+        { anno: "2023", vendite_nette_yoy: -50, vendite_lorde_yoy: -49, totale_yoy: -50 },
+        { anno: "2024", vendite_nette_yoy: 26, vendite_lorde_yoy: 44, totale_yoy: 26 },
+        { anno: "2025", vendite_nette_yoy: 53, vendite_lorde_yoy: 32, totale_yoy: 53 },
+      ],
+      promoImpact: [
+        { anno: "2022", promo_pct: (1249.33 / 23992.70 * 100).toFixed(1), promo: 1249.33, lorde: 23992.70 },
+        { anno: "2023", promo_pct: (922.90 / 12324.80 * 100).toFixed(1), promo: 922.90, lorde: 12324.80 },
+        { anno: "2024", promo_pct: (3207.00 / 17703.30 * 100).toFixed(1), promo: 3207.00, lorde: 17703.30 },
+        { anno: "2025", promo_pct: (1359.63 / 23411.20 * 100).toFixed(1), promo: 1359.63, lorde: 23411.20 },
+      ],
+      marginAnalysis: [
+        { anno: "2022", nette: 22743.37, lorde: 23992.70, erosione: 23992.70 - 22743.37, erosione_pct: ((23992.70 - 22743.37) / 23992.70 * 100).toFixed(1) },
+        { anno: "2023", nette: 11401.90, lorde: 12324.80, erosione: 12324.80 - 11401.90, erosione_pct: ((12324.80 - 11401.90) / 12324.80 * 100).toFixed(1) },
+        { anno: "2024", nette: 14397.30, lorde: 17703.30, erosione: 17703.30 - 14397.30, erosione_pct: ((17703.30 - 14397.30) / 17703.30 * 100).toFixed(1) },
+        { anno: "2025", nette: 22051.57, lorde: 23411.20, erosione: 23411.20 - 22051.57, erosione_pct: ((23411.20 - 22051.57) / 23411.20 * 100).toFixed(1) },
+      ],
+    };
 
-const fmt = (v) => typeof v === 'number' ? v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€' : '—';
-const fmtK = (v) => (v / 1000).toFixed(1) + 'k€';
-const fmtPct = (v) => (v > 0 ? '+' : '') + v + '%';
+    const CAGR = ((22051.57 / 9366.50) ** (1 / 4) - 1) * 100;
 
-const sections = ["overview", "trend", "promo", "erosione", "diagnosi"];
-const sectionLabels = {
-  overview: "Quadro Generale",
-  trend: "Trend & Crescita",
-  promo: "Politica Promozionale",
-  erosione: "Erosione Margini",
-  diagnosi: "Diagnosi Strategica",
-};
+    const fmt = (v) => typeof v === 'number' ? v.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u20AC' : '\u2014';
+    const fmtK = (v) => (v / 1000).toFixed(1) + 'k\u20AC';
 
-const CustomTooltip = ({ active, payload, label, formatter }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
-      <p style={{ color: '#a0a0b8', margin: 0, marginBottom: 6, fontWeight: 600 }}>{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color, margin: '3px 0', fontWeight: 500 }}>
-          {p.name}: {formatter ? formatter(p.value) : p.value}
-        </p>
-      ))}
-    </div>
-  );
-};
+    const sections = ["overview", "trend", "promo", "erosione", "diagnosi"];
+    const sectionLabels = {
+      overview: "Quadro Generale",
+      trend: "Trend & Crescita",
+      promo: "Politica Promozionale",
+      erosione: "Erosione Margini",
+      diagnosi: "Diagnosi Strategica",
+    };
 
-export default function AnalisiEcommerce() {
-  const [activeSection, setActiveSection] = useState("overview");
-
-  const renderOverview = () => (
-    <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-        {[
-          { label: "Vendite Nette 2025", value: fmt(22051.57), badge: "+53% YoY", color: "#00d4aa" },
-          { label: "CAGR 2021→2025", value: CAGR.toFixed(1) + "%", badge: "4 anni", color: "#6c5ce7" },
-          { label: "Picco Storico", value: fmt(22743.37), badge: "2022", color: "#fdcb6e" },
-          { label: "Valle Storica", value: fmt(11401.90), badge: "2023", color: "#e17055" },
-          { label: "Totale Vendite 2025", value: fmt(26763.81), badge: "+53% YoY", color: "#00d4aa" },
-          { label: "Erosione Media", value: "10.6%", badge: "lordo→netto", color: "#fd79a8" },
-        ].map((kpi, i) => (
-          <div key={i} style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 12, padding: '18px 20px',
-            borderLeft: `3px solid ${kpi.color}`,
-          }}>
-            <div style={{ fontSize: 11, color: '#8888a8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{kpi.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#eee', fontFamily: "'JetBrains Mono', monospace" }}>{kpi.value}</div>
-            <div style={{ fontSize: 11, color: kpi.color, marginTop: 4, fontWeight: 600 }}>{kpi.badge}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-        <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16, fontWeight: 600 }}>Evoluzione Vendite Nette vs Lorde (2022–2025)</h3>
-        <ResponsiveContainer width="100%" height={280}>
-          <ComposedChart data={data.yearly.filter(d => d.vendite_lorde !== null)}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey="anno" stroke="#666" fontSize={12} />
-            <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
-            <Tooltip content={<CustomTooltip formatter={fmt} />} />
-            <Legend wrapperStyle={{ fontSize: 12, color: '#aaa' }} />
-            <Area type="monotone" dataKey="vendite_lorde" name="Vendite Lorde" fill="rgba(108,92,231,0.15)" stroke="#6c5ce7" strokeWidth={2} />
-            <Line type="monotone" dataKey="vendite_nette" name="Vendite Nette" stroke="#00d4aa" strokeWidth={3} dot={{ r: 5, fill: '#00d4aa' }} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-        <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 8, fontWeight: 600 }}>Riepilogo per anno</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                {["Anno", "Vendite Lorde", "Codici Promo", "Resi", "Vendite Nette", "Imposte", "Totale"].map(h => (
-                  <th key={h} style={{ padding: '10px 8px', color: '#8888a8', fontWeight: 600, textAlign: 'right', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.yearly.filter(d => d.vendite_lorde !== null).map((r, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <td style={{ padding: '10px 8px', color: '#ccc', fontWeight: 700 }}>{r.anno}</td>
-                  <td style={{ padding: '10px 8px', color: '#ccc', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.vendite_lorde)}</td>
-                  <td style={{ padding: '10px 8px', color: '#fd79a8', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.codici_promo)}</td>
-                  <td style={{ padding: '10px 8px', color: '#aaa', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.resi)}</td>
-                  <td style={{ padding: '10px 8px', color: '#00d4aa', textAlign: 'right', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.vendite_nette)}</td>
-                  <td style={{ padding: '10px 8px', color: '#aaa', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.imposte)}</td>
-                  <td style={{ padding: '10px 8px', color: '#ddd', textAlign: 'right', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.totale_vendite)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTrend = () => (
-    <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Variazione % Anno su Anno</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={data.yoy}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="anno" stroke="#666" fontSize={12} />
-              <YAxis stroke="#666" fontSize={11} tickFormatter={v => v + '%'} />
-              <Tooltip content={<CustomTooltip formatter={v => v + '%'} />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="vendite_nette_yoy" name="Vendite Nette" radius={[4, 4, 0, 0]}>
-                {data.yoy.map((entry, i) => (
-                  <Cell key={i} fill={entry.vendite_nette_yoy >= 0 ? '#00d4aa' : '#e17055'} />
-                ))}
-              </Bar>
-              <Bar dataKey="vendite_lorde_yoy" name="Vendite Lorde" radius={[4, 4, 0, 0]}>
-                {data.yoy.map((entry, i) => (
-                  <Cell key={i} fill={entry.vendite_lorde_yoy >= 0 ? '#6c5ce7' : '#fd79a8'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Traiettoria di Recupero</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={data.yearly.slice(1)}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="anno" stroke="#666" fontSize={12} />
-              <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
-              <Tooltip content={<CustomTooltip formatter={fmt} />} />
-              <Line type="monotone" dataKey="vendite_nette" name="Vendite Nette" stroke="#00d4aa" strokeWidth={3} dot={{ r: 6, fill: '#00d4aa', stroke: '#1a1a2e', strokeWidth: 2 }} />
-              <Line type="monotone" dataKey="totale_vendite" name="Totale Vendite" stroke="#fdcb6e" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#fdcb6e' }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div style={{ background: 'linear-gradient(135deg, rgba(108,92,231,0.08), rgba(0,212,170,0.05))', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
-        <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 12 }}>Lettura del Ciclo di Vita</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-          {[
-            { anno: "2022", fase: "BOOM", desc: "Esplosione post-lancio o post-pandemia. Crescita +143% sulle nette. Il mercato della formazione online era al picco.", color: "#00d4aa", icon: "🚀" },
-            { anno: "2023", fase: "CRISI", desc: "Crollo del -50%. Probabile saturazione, calo della domanda post-pandemia, o perdita di competitività nel catalogo.", color: "#e17055", icon: "📉" },
-            { anno: "2024", fase: "RIPRESA", desc: "Recupero +26%. Segnali di stabilizzazione, ma pesante erosione da promo (18.1% del lordo). Crescita drogata?", color: "#fdcb6e", icon: "🔄" },
-            { anno: "2025", fase: "RILANCIO", desc: "Forte rimbalzo +53%. Quasi al livello 2022. Promo ridotte al 5.8%. Crescita più sana e sostenibile.", color: "#6c5ce7", icon: "📈" },
-          ].map((p, i) => (
-            <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 10, padding: 16, borderTop: `3px solid ${p.color}` }}>
-              <div style={{ fontSize: 28, marginBottom: 4 }}>{p.icon}</div>
-              <div style={{ color: p.color, fontWeight: 800, fontSize: 13, letterSpacing: 1 }}>{p.anno} — {p.fase}</div>
-              <div style={{ color: '#aab', fontSize: 12, marginTop: 8, lineHeight: 1.5 }}>{p.desc}</div>
-            </div>
+    const CustomTooltip = ({ active, payload, label, formatter }) => {
+      if (!active || !payload || !payload.length) return null;
+      return (
+        <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>
+          <p style={{ color: '#a0a0b8', margin: 0, marginBottom: 6, fontWeight: 600 }}>{label}</p>
+          {payload.map((p, i) => (
+            <p key={i} style={{ color: p.color, margin: '3px 0', fontWeight: 500 }}>
+              {p.name}: {formatter ? formatter(p.value) : p.value}
+            </p>
           ))}
         </div>
-      </div>
-    </div>
-  );
+      );
+    };
 
-  const renderPromo = () => (
-    <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Incidenza Codici Promozionali</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <ComposedChart data={data.promoImpact}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis dataKey="anno" stroke="#666" fontSize={12} />
-              <YAxis yAxisId="left" stroke="#666" fontSize={11} tickFormatter={fmtK} />
-              <YAxis yAxisId="right" orientation="right" stroke="#fd79a8" fontSize={11} tickFormatter={v => v + '%'} />
-              <Tooltip content={<CustomTooltip formatter={v => typeof v === 'number' && v < 100 ? v + '%' : fmt(v)} />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar yAxisId="left" dataKey="promo" name="Valore Promo (€)" fill="#fd79a8" radius={[4, 4, 0, 0]} opacity={0.7} />
-              <Line yAxisId="right" type="monotone" dataKey="promo_pct" name="% su Lordo" stroke="#fdcb6e" strokeWidth={3} dot={{ r: 5, fill: '#fdcb6e' }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+    function AnalisiEcommerce() {
+      const [activeSection, setActiveSection] = useState("overview");
+
+      const renderOverview = () => (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+            {[
+              { label: "Vendite Nette 2025", value: fmt(22051.57), badge: "+53% YoY", color: "#00d4aa" },
+              { label: "CAGR 2021\u21922025", value: CAGR.toFixed(1) + "%", badge: "4 anni", color: "#6c5ce7" },
+              { label: "Picco Storico", value: fmt(22743.37), badge: "2022", color: "#fdcb6e" },
+              { label: "Valle Storica", value: fmt(11401.90), badge: "2023", color: "#e17055" },
+              { label: "Totale Vendite 2025", value: fmt(26763.81), badge: "+53% YoY", color: "#00d4aa" },
+              { label: "Erosione Media", value: "10.6%", badge: "lordo\u2192netto", color: "#fd79a8" },
+            ].map((kpi, i) => (
+              <div key={i} style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12, padding: '18px 20px',
+                borderLeft: '3px solid ' + kpi.color,
+              }}>
+                <div style={{ fontSize: 11, color: '#8888a8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>{kpi.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#eee', fontFamily: "'JetBrains Mono', monospace" }}>{kpi.value}</div>
+                <div style={{ fontSize: 11, color: kpi.color, marginTop: 4, fontWeight: 600 }}>{kpi.badge}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+            <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16, fontWeight: 600 }}>Evoluzione Vendite Nette vs Lorde (2022\u20132025)</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <ComposedChart data={data.yearly.filter(d => d.vendite_lorde !== null)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="anno" stroke="#666" fontSize={12} />
+                <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
+                <Tooltip content={<CustomTooltip formatter={fmt} />} />
+                <Legend wrapperStyle={{ fontSize: 12, color: '#aaa' }} />
+                <Area type="monotone" dataKey="vendite_lorde" name="Vendite Lorde" fill="rgba(108,92,231,0.15)" stroke="#6c5ce7" strokeWidth={2} />
+                <Line type="monotone" dataKey="vendite_nette" name="Vendite Nette" stroke="#00d4aa" strokeWidth={3} dot={{ r: 5, fill: '#00d4aa' }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{ marginTop: 24, background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+            <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 8, fontWeight: 600 }}>Riepilogo per anno</h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    {["Anno", "Vendite Lorde", "Codici Promo", "Resi", "Vendite Nette", "Imposte", "Totale"].map(h => (
+                      <th key={h} style={{ padding: '10px 8px', color: '#8888a8', fontWeight: 600, textAlign: 'right', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.yearly.filter(d => d.vendite_lorde !== null).map((r, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                      <td style={{ padding: '10px 8px', color: '#ccc', fontWeight: 700 }}>{r.anno}</td>
+                      <td style={{ padding: '10px 8px', color: '#ccc', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.vendite_lorde)}</td>
+                      <td style={{ padding: '10px 8px', color: '#fd79a8', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.codici_promo)}</td>
+                      <td style={{ padding: '10px 8px', color: '#aaa', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.resi)}</td>
+                      <td style={{ padding: '10px 8px', color: '#00d4aa', textAlign: 'right', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.vendite_nette)}</td>
+                      <td style={{ padding: '10px 8px', color: '#aaa', textAlign: 'right', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.imposte)}</td>
+                      <td style={{ padding: '10px 8px', color: '#ddd', textAlign: 'right', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{fmt(r.totale_vendite)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      );
 
-        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-          <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Dettaglio Impatto Promozionale</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {data.promoImpact.map((d, i) => {
-              const pct = parseFloat(d.promo_pct);
-              const isHigh = pct > 15;
+      const renderTrend = () => (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 20, marginBottom: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Variazione % Anno su Anno</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={data.yoy}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="anno" stroke="#666" fontSize={12} />
+                  <YAxis stroke="#666" fontSize={11} tickFormatter={v => v + '%'} />
+                  <Tooltip content={<CustomTooltip formatter={v => v + '%'} />} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="vendite_nette_yoy" name="Vendite Nette" radius={[4, 4, 0, 0]}>
+                    {data.yoy.map((entry, i) => (
+                      <Cell key={i} fill={entry.vendite_nette_yoy >= 0 ? '#00d4aa' : '#e17055'} />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="vendite_lorde_yoy" name="Vendite Lorde" radius={[4, 4, 0, 0]}>
+                    {data.yoy.map((entry, i) => (
+                      <Cell key={i} fill={entry.vendite_lorde_yoy >= 0 ? '#6c5ce7' : '#fd79a8'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Traiettoria di Recupero</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={data.yearly.slice(1)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="anno" stroke="#666" fontSize={12} />
+                  <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
+                  <Tooltip content={<CustomTooltip formatter={fmt} />} />
+                  <Line type="monotone" dataKey="vendite_nette" name="Vendite Nette" stroke="#00d4aa" strokeWidth={3} dot={{ r: 6, fill: '#00d4aa', stroke: '#1a1a2e', strokeWidth: 2 }} />
+                  <Line type="monotone" dataKey="totale_vendite" name="Totale Vendite" stroke="#fdcb6e" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4, fill: '#fdcb6e' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, rgba(108,92,231,0.08), rgba(0,212,170,0.05))', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 12 }}>Lettura del Ciclo di Vita</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+              {[
+                { anno: "2022", fase: "BOOM", desc: "Esplosione post-lancio o post-pandemia. Crescita +143% sulle nette. Il mercato della formazione online era al picco.", color: "#00d4aa", icon: "\uD83D\uDE80" },
+                { anno: "2023", fase: "CRISI", desc: "Crollo del -50%. Probabile saturazione, calo della domanda post-pandemia, o perdita di competitivit\u00E0 nel catalogo.", color: "#e17055", icon: "\uD83D\uDCC9" },
+                { anno: "2024", fase: "RIPRESA", desc: "Recupero +26%. Segnali di stabilizzazione, ma pesante erosione da promo (18.1% del lordo). Crescita drogata?", color: "#fdcb6e", icon: "\uD83D\uDD04" },
+                { anno: "2025", fase: "RILANCIO", desc: "Forte rimbalzo +53%. Quasi al livello 2022. Promo ridotte al 5.8%. Crescita pi\u00F9 sana e sostenibile.", color: "#6c5ce7", icon: "\uD83D\uDCC8" },
+              ].map((p, i) => (
+                <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 10, padding: 16, borderTop: '3px solid ' + p.color }}>
+                  <div style={{ fontSize: 28, marginBottom: 4 }}>{p.icon}</div>
+                  <div style={{ color: p.color, fontWeight: 800, fontSize: 13, letterSpacing: 1 }}>{p.anno} — {p.fase}</div>
+                  <div style={{ color: '#aab', fontSize: 12, marginTop: 8, lineHeight: 1.5 }}>{p.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+      const renderPromo = () => (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 20, marginBottom: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Incidenza Codici Promozionali</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <ComposedChart data={data.promoImpact}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="anno" stroke="#666" fontSize={12} />
+                  <YAxis yAxisId="left" stroke="#666" fontSize={11} tickFormatter={fmtK} />
+                  <YAxis yAxisId="right" orientation="right" stroke="#fd79a8" fontSize={11} tickFormatter={v => v + '%'} />
+                  <Tooltip content={<CustomTooltip formatter={v => typeof v === 'number' && v < 100 ? v + '%' : fmt(v)} />} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar yAxisId="left" dataKey="promo" name="Valore Promo (\u20AC)" fill="#fd79a8" radius={[4, 4, 0, 0]} opacity={0.7} />
+                  <Line yAxisId="right" type="monotone" dataKey="promo_pct" name="% su Lordo" stroke="#fdcb6e" strokeWidth={3} dot={{ r: 5, fill: '#fdcb6e' }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Dettaglio Impatto Promozionale</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {data.promoImpact.map((d, i) => {
+                  const pct = parseFloat(d.promo_pct);
+                  const isHigh = pct > 15;
+                  return (
+                    <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span style={{ color: '#ddd', fontWeight: 700, fontSize: 14 }}>{d.anno}</span>
+                        <span style={{ color: isHigh ? '#e17055' : '#00d4aa', fontWeight: 700, fontSize: 14 }}>{d.promo_pct}%</span>
+                      </div>
+                      <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
+                        <div style={{
+                          width: Math.min(pct * 3, 100) + '%',
+                          height: '100%',
+                          background: isHigh ? 'linear-gradient(90deg, #e17055, #fd79a8)' : 'linear-gradient(90deg, #00d4aa, #6c5ce7)',
+                          borderRadius: 4,
+                        }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: '#888' }}>
+                        <span>Promo: {fmt(d.promo)}</span>
+                        <span>Lordo: {fmt(d.lorde)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, rgba(253,121,168,0.08), rgba(253,203,110,0.05))', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 10 }}>Analisi Critica della Politica Promozionale</h3>
+            <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.7 }}>
+              <p style={{ margin: '0 0 12px' }}><strong style={{ color: '#fd79a8' }}>2024 — Allarme rosso:</strong> il 18.1% del fatturato lordo è stato eroso da codici promozionali (3.207€ su 17.703€). Per un e-commerce di formazione, questo è un segnale pericoloso: indica che i clienti percepiscono il prezzo come troppo alto, oppure che si sta creando dipendenza dagli sconti.</p>
+              <p style={{ margin: '0 0 12px' }}><strong style={{ color: '#00d4aa' }}>2025 — Correzione virtuosa:</strong> l'incidenza è scesa al 5.8% (1.359€ su 23.411€). Ciò significa che la crescita del 2025 è stata raggiunta con minore leva promozionale: il valore percepito del prodotto è aumentato, oppure il traffico organico/qualificato è migliorato.</p>
+              <p style={{ margin: 0 }}><strong style={{ color: '#fdcb6e' }}>Rischio strutturale:</strong> nel settore formazione, i codici promo superiori al 10% del lordo segnalano una commodity trap — il rischio che il cliente acquisti solo con sconto, distruggendo il brand premium.</p>
+            </div>
+          </div>
+        </div>
+      );
+
+      const renderErosione = () => (
+        <div>
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
+            <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Gap Vendite Lorde → Nette (Erosione Complessiva)</h3>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={data.marginAnalysis}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="anno" stroke="#666" fontSize={12} />
+                <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
+                <Tooltip content={<CustomTooltip formatter={fmt} />} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="nette" name="Vendite Nette" stackId="a" fill="#00d4aa" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="erosione" name="Erosione (Promo+Resi)" stackId="a" fill="#e17055" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            {data.marginAnalysis.map((d, i) => {
+              const pct = parseFloat(d.erosione_pct);
+              const severity = pct > 15 ? '#e17055' : pct > 8 ? '#fdcb6e' : '#00d4aa';
+              const label = pct > 15 ? 'CRITICO' : pct > 8 ? 'ATTENZIONE' : 'SANO';
               return (
-                <div key={i} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ color: '#ddd', fontWeight: 700, fontSize: 14 }}>{d.anno}</span>
-                    <span style={{ color: isHigh ? '#e17055' : '#00d4aa', fontWeight: 700, fontSize: 14 }}>{d.promo_pct}%</span>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
-                    <div style={{
-                      width: `${Math.min(pct * 3, 100)}%`,
-                      height: '100%',
-                      background: isHigh ? 'linear-gradient(90deg, #e17055, #fd79a8)' : 'linear-gradient(90deg, #00d4aa, #6c5ce7)',
-                      borderRadius: 4,
-                      transition: 'width 0.5s ease',
-                    }} />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: '#888' }}>
-                    <span>Promo: {fmt(d.promo)}</span>
-                    <span>Lordo: {fmt(d.lorde)}</span>
+                <div key={i} style={{
+                  background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 20,
+                  border: '1px solid rgba(255,255,255,0.06)', borderBottom: '3px solid ' + severity,
+                }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#ddd', marginBottom: 4 }}>{d.anno}</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: severity, fontFamily: "'JetBrains Mono', monospace" }}>{d.erosione_pct}%</div>
+                  <div style={{ fontSize: 11, color: severity, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>{label}</div>
+                  <div style={{ fontSize: 11, color: '#888', lineHeight: 1.5 }}>
+                    Perso: {fmt(d.erosione)}<br />
+                    Lordo: {fmt(d.lorde)}<br />
+                    Netto: {fmt(d.nette)}
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-      </div>
+      );
 
-      <div style={{ background: 'linear-gradient(135deg, rgba(253,121,168,0.08), rgba(253,203,110,0.05))', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
-        <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 10 }}>Analisi Critica della Politica Promozionale</h3>
-        <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.7 }}>
-          <p style={{ margin: '0 0 12px' }}><strong style={{ color: '#fd79a8' }}>2024 — Allarme rosso:</strong> il 18.1% del fatturato lordo è stato eroso da codici promozionali (3.207€ su 17.703€). Per un e-commerce di formazione, questo è un segnale pericoloso: indica che i clienti percepiscono il prezzo come troppo alto, oppure che si sta creando dipendenza dagli sconti.</p>
-          <p style={{ margin: '0 0 12px' }}><strong style={{ color: '#00d4aa' }}>2025 — Correzione virtuosa:</strong> l'incidenza è scesa al 5.8% (1.359€ su 23.411€). Ciò significa che la crescita del 2025 è stata raggiunta con minore leva promozionale: il valore percepito del prodotto è aumentato, oppure il traffico organico/qualificato è migliorato.</p>
-          <p style={{ margin: 0 }}><strong style={{ color: '#fdcb6e' }}>Rischio strutturale:</strong> nel settore formazione, i codici promo superiori al 10% del lordo segnalano una commodity trap — il rischio che il cliente acquisti solo con sconto, distruggendo il brand premium.</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderErosione = () => (
-    <div>
-      <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
-        <h3 style={{ color: '#ddd', fontSize: 15, marginTop: 0, marginBottom: 16 }}>Gap Vendite Lorde → Nette (Erosione Complessiva)</h3>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={data.marginAnalysis}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey="anno" stroke="#666" fontSize={12} />
-            <YAxis stroke="#666" fontSize={11} tickFormatter={fmtK} />
-            <Tooltip content={<CustomTooltip formatter={fmt} />} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="nette" name="Vendite Nette" stackId="a" fill="#00d4aa" radius={[0, 0, 0, 0]} />
-            <Bar dataKey="erosione" name="Erosione (Promo+Resi)" stackId="a" fill="#e17055" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-        {data.marginAnalysis.map((d, i) => {
-          const pct = parseFloat(d.erosione_pct);
-          const severity = pct > 15 ? '#e17055' : pct > 8 ? '#fdcb6e' : '#00d4aa';
-          const label = pct > 15 ? 'CRITICO' : pct > 8 ? 'ATTENZIONE' : 'SANO';
-          return (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 20,
-              border: `1px solid rgba(255,255,255,0.06)`, borderBottom: `3px solid ${severity}`,
-            }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#ddd', marginBottom: 4 }}>{d.anno}</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: severity, fontFamily: "'JetBrains Mono', monospace" }}>{d.erosione_pct}%</div>
-              <div style={{ fontSize: 11, color: severity, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>{label}</div>
-              <div style={{ fontSize: 11, color: '#888', lineHeight: 1.5 }}>
-                Perso: {fmt(d.erosione)}<br />
-                Lordo: {fmt(d.lorde)}<br />
-                Netto: {fmt(d.nette)}
+      const renderDiagnosi = () => (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 20, marginBottom: 24 }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.08), rgba(0,212,170,0.02))', borderRadius: 12, padding: 24, border: '1px solid rgba(0,212,170,0.15)' }}>
+              <h3 style={{ color: '#00d4aa', fontSize: 15, marginTop: 0, marginBottom: 12 }}>PUNTI DI FORZA</h3>
+              <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
+                {[
+                  "Forte recupero 2024-2025: il business ha dimostrato resilienza dopo il crollo 2023",
+                  "CAGR +23.8% su 4 anni: crescita composta significativa nonostante la crisi",
+                  "2025 quasi al livello record 2022: il progetto \u00E8 tornato ai massimi",
+                  "Zero resi (tranne 99\u20AC nel 2024): la qualit\u00E0 del prodotto formativo \u00E8 percepita come alta",
+                  "Zero spedizione: modello digitale puro, ottimo per la scalabilit\u00E0",
+                  "Riduzione dipendenza promo nel 2025: pricing power in crescita",
+                ].map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                    <span style={{ color: '#00d4aa', flexShrink: 0 }}>{"\u2713"}</span>
+                    <span>{s}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 
-  const renderDiagnosi = () => (
-    <div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        <div style={{ background: 'linear-gradient(135deg, rgba(0,212,170,0.08), rgba(0,212,170,0.02))', borderRadius: 12, padding: 24, border: '1px solid rgba(0,212,170,0.15)' }}>
-          <h3 style={{ color: '#00d4aa', fontSize: 15, marginTop: 0, marginBottom: 12 }}>PUNTI DI FORZA</h3>
-          <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
-            {[
-              "Forte recupero 2024-2025: il business ha dimostrato resilienza dopo il crollo 2023",
-              "CAGR +23.8% su 4 anni: crescita composta significativa nonostante la crisi",
-              "2025 quasi al livello record 2022: il progetto è tornato ai massimi",
-              "Zero resi (tranne 99€ nel 2024): la qualità del prodotto formativo è percepita come alta",
-              "Zero spedizione: modello digitale puro, ottimo per la scalabilità",
-              "Riduzione dipendenza promo nel 2025: pricing power in crescita",
-            ].map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                <span style={{ color: '#00d4aa', flexShrink: 0 }}>✓</span>
-                <span>{s}</span>
+            <div style={{ background: 'linear-gradient(135deg, rgba(225,112,85,0.08), rgba(225,112,85,0.02))', borderRadius: 12, padding: 24, border: '1px solid rgba(225,112,85,0.15)' }}>
+              <h3 style={{ color: '#e17055', fontSize: 15, marginTop: 0, marginBottom: 12 }}>CRITICIT\u00C0</h3>
+              <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
+                {[
+                  "Volatilit\u00E0 estrema: oscillazioni del 50%+ YoY indicano base clienti instabile",
+                  "Nessuna crescita netta 2022\u21922025: le vendite nette 2025 (22.051\u20AC) sono sotto il 2022 (22.743\u20AC)",
+                  "Stagionalit\u00E0 marcata: picchi Feb/Set e crolli estivi suggeriscono dipendenza da cicli formativi",
+                  "Fatturato complessivo modesto: sotto i 25k\u20AC/anno netti non consente investimenti strutturali",
+                  "2024 ha richiesto promo pesanti per crescere: la domanda organica \u00E8 ancora fragile",
+                  "Assenza di dati su AOV, conversion rate e CAC: impossibile ottimizzare senza queste metriche",
+                ].map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                    <span style={{ color: '#e17055', flexShrink: 0 }}>{"\u2717"}</span>
+                    <span>{s}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ background: 'linear-gradient(135deg, rgba(225,112,85,0.08), rgba(225,112,85,0.02))', borderRadius: 12, padding: 24, border: '1px solid rgba(225,112,85,0.15)' }}>
-          <h3 style={{ color: '#e17055', fontSize: 15, marginTop: 0, marginBottom: 12 }}>CRITICITÀ</h3>
-          <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
-            {[
-              "Volatilità estrema: oscillazioni del 50%+ YoY indicano base clienti instabile",
-              "Nessuna crescita netta 2022→2025: le vendite nette 2025 (22.051€) sono sotto il 2022 (22.743€)",
-              "Stagionalità marcata: picchi Feb/Set e crolli estivi suggeriscono dipendenza da cicli formativi",
-              "Fatturato complessivo modesto: sotto i 25k€/anno netti non consente investimenti strutturali",
-              "2024 ha richiesto promo pesanti per crescere: la domanda organica è ancora fragile",
-              "Assenza di dati su AOV, conversion rate e CAC: impossibile ottimizzare senza queste metriche",
-            ].map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                <span style={{ color: '#e17055', flexShrink: 0 }}>✗</span>
-                <span>{s}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ background: 'linear-gradient(135deg, rgba(108,92,231,0.1), rgba(108,92,231,0.03))', borderRadius: 12, padding: 24, border: '1px solid rgba(108,92,231,0.15)', marginBottom: 20 }}>
-        <h3 style={{ color: '#b8a9ff', fontSize: 15, marginTop: 0, marginBottom: 12 }}>RACCOMANDAZIONI STRATEGICHE</h3>
-        <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
-          {[
-            { title: "Diversificare il catalogo", desc: "La volatilità suggerisce dipendenza da pochi corsi. Creare un funnel con: corsi entry-level (sotto 50€), corsi core (100-300€), e programmi premium (500€+) per stabilizzare i ricavi." },
-            { title: "Implementare abbonamenti/membership", desc: "Un modello ricorrente (es. 19-49€/mese) ridurrebbe la volatilità e creerebbe revenue prevedibile. Nel settore formazione, il churn rate medio è 5-8%/mese." },
-            { title: "Monitorare i KPI mancanti", desc: "Servono: AOV (valore medio ordine), tasso di conversione, CAC (costo acquisizione cliente), LTV (lifetime value), tasso di completamento corsi. Senza questi, ogni decisione è al buio." },
-            { title: "Strategia anti-stagionalità", desc: "I crolli estivi (Lug-Ago) sono tipici della formazione. Contromisure: summer sales mirate, corsi brevi/intensivi estivi, partnership B2B con aziende che pianificano formazione annuale." },
-            { title: "Scalare con cautela le promo", desc: "Il 2025 dimostra che si può crescere senza scontistica aggressiva. Mantenere i codici promo sotto il 7% del lordo e usarli tatticamente (carrello abbandonato, upsell), non strategicamente." },
-          ].map((r, i) => (
-            <div key={i} style={{ marginBottom: 14, paddingLeft: 16, borderLeft: '2px solid rgba(108,92,231,0.4)' }}>
-              <strong style={{ color: '#b8a9ff' }}>{i + 1}. {r.title}</strong>
-              <div style={{ marginTop: 4 }}>{r.desc}</div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div style={{ background: 'rgba(253,203,110,0.08)', borderRadius: 12, padding: 20, border: '1px solid rgba(253,203,110,0.15)' }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-          <span style={{ fontSize: 24 }}>⚠️</span>
-          <div>
-            <h4 style={{ color: '#fdcb6e', margin: '0 0 6px', fontSize: 14 }}>Verdetto complessivo</h4>
-            <p style={{ color: '#bbb', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-              Il progetto mostra segni di vitalità e un trend positivo nel biennio 2024-2025, ma è ancora strutturalmente fragile. Con vendite nette sotto i 23k€/anno, siamo in una fase di micro-impresa che necessita di un salto qualitativo: diversificazione del catalogo, ricavi ricorrenti e metriche di performance avanzate. Il 2025 è stato un anno positivo, ma per consolidare servono investimenti mirati in acquisizione clienti e retention.
-            </p>
+          <div style={{ background: 'linear-gradient(135deg, rgba(108,92,231,0.1), rgba(108,92,231,0.03))', borderRadius: 12, padding: 24, border: '1px solid rgba(108,92,231,0.15)', marginBottom: 20 }}>
+            <h3 style={{ color: '#b8a9ff', fontSize: 15, marginTop: 0, marginBottom: 12 }}>RACCOMANDAZIONI STRATEGICHE</h3>
+            <div style={{ color: '#bbb', fontSize: 13, lineHeight: 1.8 }}>
+              {[
+                { title: "Diversificare il catalogo", desc: "La volatilit\u00E0 suggerisce dipendenza da pochi corsi. Creare un funnel con: corsi entry-level (sotto 50\u20AC), corsi core (100-300\u20AC), e programmi premium (500\u20AC+) per stabilizzare i ricavi." },
+                { title: "Implementare abbonamenti/membership", desc: "Un modello ricorrente (es. 19-49\u20AC/mese) ridurrebbe la volatilit\u00E0 e creerebbe revenue prevedibile. Nel settore formazione, il churn rate medio \u00E8 5-8%/mese." },
+                { title: "Monitorare i KPI mancanti", desc: "Servono: AOV (valore medio ordine), tasso di conversione, CAC (costo acquisizione cliente), LTV (lifetime value), tasso di completamento corsi. Senza questi, ogni decisione \u00E8 al buio." },
+                { title: "Strategia anti-stagionalit\u00E0", desc: "I crolli estivi (Lug-Ago) sono tipici della formazione. Contromisure: summer sales mirate, corsi brevi/intensivi estivi, partnership B2B con aziende che pianificano formazione annuale." },
+                { title: "Scalare con cautela le promo", desc: "Il 2025 dimostra che si pu\u00F2 crescere senza scontistica aggressiva. Mantenere i codici promo sotto il 7% del lordo e usarli tatticamente (carrello abbandonato, upsell), non strategicamente." },
+              ].map((r, i) => (
+                <div key={i} style={{ marginBottom: 14, paddingLeft: 16, borderLeft: '2px solid rgba(108,92,231,0.4)' }}>
+                  <strong style={{ color: '#b8a9ff' }}>{i + 1}. {r.title}</strong>
+                  <div style={{ marginTop: 4 }}>{r.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(253,203,110,0.08)', borderRadius: 12, padding: 20, border: '1px solid rgba(253,203,110,0.15)' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 24 }}>{"\u26A0\uFE0F"}</span>
+              <div>
+                <h4 style={{ color: '#fdcb6e', margin: '0 0 6px', fontSize: 14 }}>Verdetto complessivo</h4>
+                <p style={{ color: '#bbb', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+                  Il progetto mostra segni di vitalit\u00E0 e un trend positivo nel biennio 2024-2025, ma \u00E8 ancora strutturalmente fragile. Con vendite nette sotto i 23k\u20AC/anno, siamo in una fase di micro-impresa che necessita di un salto qualitativo: diversificazione del catalogo, ricavi ricorrenti e metriche di performance avanzate. Il 2025 \u00E8 stato un anno positivo, ma per consolidare servono investimenti mirati in acquisizione clienti e retention.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      );
 
-  const renderers = { overview: renderOverview, trend: renderTrend, promo: renderPromo, erosione: renderErosione, diagnosi: renderDiagnosi };
+      const renderers = { overview: renderOverview, trend: renderTrend, promo: renderPromo, erosione: renderErosione, diagnosi: renderDiagnosi };
 
-  return (
-    <div style={{
-      minHeight: '100vh', background: '#0f0f1a', color: '#ccc',
-      fontFamily: "'Outfit', 'Segoe UI', sans-serif",
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+      return (
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 11, color: '#6c5ce7', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Analisi Economica</div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: '#eee', margin: 0, lineHeight: 1.2 }}>E-Commerce Formazione Professionale</h1>
+            <p style={{ fontSize: 13, color: '#777', marginTop: 6 }}>Periodo di analisi: 2021–2025 • Dashboard diagnostica completa</p>
+          </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 11, color: '#6c5ce7', fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Analisi Economica</div>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#eee', margin: 0, lineHeight: 1.2 }}>E-Commerce Formazione Professionale</h1>
-          <p style={{ fontSize: 13, color: '#777', marginTop: 6 }}>Periodo di analisi: 2021–2025 • Dashboard diagnostica completa</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
+            {sections.map(s => (
+              <button
+                key={s}
+                onClick={() => setActiveSection(s)}
+                style={{
+                  background: activeSection === s ? 'linear-gradient(135deg, #6c5ce7, #00d4aa)' : 'rgba(255,255,255,0.04)',
+                  color: activeSection === s ? '#fff' : '#888',
+                  border: activeSection === s ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.2s ease', fontFamily: 'inherit',
+                }}
+              >
+                {sectionLabels[s]}
+              </button>
+            ))}
+          </div>
+
+          {renderers[activeSection]()}
         </div>
+      );
+    }
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap' }}>
-          {sections.map(s => (
-            <button
-              key={s}
-              onClick={() => setActiveSection(s)}
-              style={{
-                background: activeSection === s ? 'linear-gradient(135deg, #6c5ce7, #00d4aa)' : 'rgba(255,255,255,0.04)',
-                color: activeSection === s ? '#fff' : '#888',
-                border: activeSection === s ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', transition: 'all 0.2s ease', fontFamily: 'inherit',
-              }}
-            >
-              {sectionLabels[s]}
-            </button>
-          ))}
-        </div>
-
-        {renderers[activeSection]()}
-      </div>
-    </div>
-  );
-}
+    ReactDOM.createRoot(document.getElementById('root')).render(<AnalisiEcommerce />);
+  </script>
+</body>
+</html>
