@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEM Volume Calculator – Documentazione | pyarchinit</title>
+
+  <!-- Font: Copse per titoli (Tactile theme), Noto Sans per testo, Source Code Pro per codice -->
+  <link href="https://fonts.googleapis.com/css2?family=Copse&family=Noto+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =====================================================================
+       RESET & VARIABILI — Palette Jekyll Tactile + branding pyarchinit
+    ===================================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pai-green:        #2e5e3e;
+      --pai-green-dark:   #1a3d28;
+      --pai-green-mid:    #3d7a52;
+      --pai-green-light:  #e8f2ec;
+      --pai-amber:        #c07d2e;
+      --pai-amber-light:  #e09840;
+      --pai-amber-bg:     #fdf5e6;
+      --tact-header:      #171717;
+      --tact-body-bg:     #fafafa;
+      --tact-border:      #d8d8d8;
+      --tact-text:        #444;
+      --tact-text-light:  #777;
+      --tact-text-dark:   #232323;
+      --code-bg:          #1e2a22;
+      --code-fg:          #a8d5b5;
+      --code-inline-bg:   #eaf2ec;
+      --sidebar-w:        268px;
+      --header-h:         68px;
+      --radius:           5px;
+      --shadow-sm:        0 1px 4px rgba(0,0,0,.10);
+      --shadow-md:        0 3px 12px rgba(0,0,0,.13);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans', 'Lucida Grande', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.78;
+      color: var(--tact-text);
+      background: var(--tact-body-bg);
+    }
+
+    /* =====================================================================
+       HEADER — stile Tactile (dark)
+    ===================================================================== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      height: var(--header-h);
+      background: var(--tact-header);
+      background-image: repeating-linear-gradient(
+        -45deg, transparent, transparent 3px,
+        rgba(255,255,255,.018) 3px, rgba(255,255,255,.018) 6px
+      );
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.4);
+      border-bottom: 2px solid var(--pai-green-dark);
+    }
+
+    .header-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--pai-green) 0%, var(--pai-green-mid) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      font-family: 'Copse', serif;
+      box-shadow: 0 2px 8px rgba(46,94,62,.5);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .header-brand {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      gap: 1px;
+    }
+    .header-brand-name {
+      font-family: 'Copse', serif;
+      font-size: 17px;
+      color: #f0f0f0;
+    }
+    .header-brand-sub {
+      font-size: 10px;
+      color: rgba(255,255,255,.42);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header-divider {
+      width: 1px; height: 30px;
+      background: rgba(255,255,255,.12);
+      margin: 0 4px;
+    }
+    .header-plugin-name { font-size: 14px; color: rgba(255,255,255,.7); font-weight: 600; }
+
+    .header-nav {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-nav a {
+      color: rgba(255,255,255,.65);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 5px 11px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all .2s;
+      font-weight: 600;
+    }
+    .header-nav a:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); color: #fff; }
+    .header-nav a.btn-primary { background: var(--pai-green); border-color: var(--pai-green-mid); color: #fff; }
+    .header-nav a.btn-primary:hover { background: var(--pai-green-mid); }
+
+    .badge-version {
+      background: var(--pai-amber);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      letter-spacing: .3px;
+      margin-left: 4px;
+    }
+
+    /* =====================================================================
+       LAYOUT
+    ===================================================================== */
+    .wrapper { display: flex; min-height: calc(100vh - var(--header-h)); }
+
+    aside {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--tact-border);
+      padding: 20px 0 40px;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+    }
+    aside::-webkit-scrollbar { width: 4px; }
+    aside::-webkit-scrollbar-thumb { background: var(--tact-border); border-radius: 2px; }
+
+    .sidebar-section { margin-bottom: 6px; }
+    .sidebar-heading {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.4px;
+      color: var(--tact-text-light);
+      padding: 10px 20px 4px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 20px;
+      text-decoration: none;
+      color: var(--tact-text-light);
+      font-size: 13.5px;
+      border-left: 3px solid transparent;
+      transition: all .15s ease;
+      line-height: 1.35;
+    }
+    .sidebar-link:hover { color: var(--pai-green); background: var(--pai-green-light); border-left-color: var(--pai-green-mid); }
+    .sidebar-link.active { color: var(--pai-green-dark); font-weight: 700; background: var(--pai-green-light); border-left-color: var(--pai-green); }
+    .sidebar-link .icon { font-size: 13px; width: 17px; text-align: center; flex-shrink: 0; opacity: .8; }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      padding: 44px 52px 100px;
+      max-width: 880px;
+    }
+
+    /* =====================================================================
+       TIPOGRAFIA — Copse per titoli (Tactile theme)
+    ===================================================================== */
+    h1 { font-family: 'Copse', serif; font-size: 2.2rem; font-weight: 400; color: var(--tact-text-dark); line-height: 1.25; margin-bottom: 14px; }
+    h2 { font-family: 'Copse', serif; font-size: 1.5rem; font-weight: 400; color: var(--pai-green-dark); margin-top: 56px; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid var(--pai-green-mid); display: flex; align-items: center; gap: 10px; }
+    h2 .section-icon { font-size: 1.1rem; opacity: .75; }
+    h3 { font-family: 'Copse', serif; font-size: 1.12rem; font-weight: 400; color: var(--tact-text-dark); margin-top: 32px; margin-bottom: 12px; }
+    h4 { font-size: .95rem; font-weight: 700; color: var(--pai-green); margin-bottom: 8px; }
+
+    p { margin-bottom: 15px; }
+    a { color: var(--pai-green); text-decoration: none; }
+    a:hover { text-decoration: underline; color: var(--pai-amber); }
+    ul, ol { padding-left: 22px; margin-bottom: 16px; }
+    li { margin-bottom: 6px; }
+    strong { color: var(--tact-text-dark); }
+
+    /* =====================================================================
+       BANNER PYARCHINIT
+    ===================================================================== */
+    .pyai-banner {
+      background: linear-gradient(135deg, #0d2b1a 0%, #1a3d28 50%, #2e5e3e 100%);
+      border-radius: var(--radius);
+      padding: 20px 28px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .pyai-banner-logo {
+      font-family: 'Copse', serif;
+      font-size: 36px;
+      color: rgba(255,255,255,.85);
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .pyai-banner-text { flex: 1; }
+    .pyai-banner-title {
+      font-family: 'Copse', serif;
+      font-size: 15px;
+      color: rgba(255,255,255,.95);
+      margin-bottom: 4px;
+    }
+    .pyai-banner-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,.6);
+      line-height: 1.55;
+    }
+    .pyai-banner-link {
+      font-size: 12px;
+      color: var(--pai-amber-light);
+      text-decoration: none;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pyai-banner-link:hover { color: #fff; text-decoration: underline; }
+
+    /* =====================================================================
+       HERO BANNER
+    ===================================================================== */
+    .hero {
+      background: linear-gradient(140deg, var(--tact-header) 0%, var(--pai-green-dark) 60%, var(--pai-green) 100%);
+      border-radius: var(--radius);
+      padding: 40px 44px;
+      margin-bottom: 32px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .hero::before {
+      content: '⛰';
+      position: absolute; right: 36px; top: 50%; transform: translateY(-50%);
+      font-size: 100px; opacity: .08; pointer-events: none;
+    }
+    .hero h1 { color: #fff; font-size: 2rem; margin-bottom: 10px; }
+    .hero .hero-desc { color: rgba(255,255,255,.82); font-size: 15px; max-width: 540px; margin-bottom: 22px; line-height: 1.7; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+    .hero-meta span {
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 20px; padding: 4px 13px;
+      color: rgba(255,255,255,.92); font-size: 12px; font-weight: 600;
+    }
+
+    /* =====================================================================
+       FEATURE GRID
+    ===================================================================== */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--tact-border);
+      border-top: 3px solid var(--pai-green);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .feature-card .feat-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+    .feature-card h4 { font-size: 13.5px; margin-bottom: 6px; }
+    .feature-card p { font-size: 13px; color: var(--tact-text-light); margin: 0; line-height: 1.55; }
+
+    /* =====================================================================
+       CARDS & CALLOUTS
+    ===================================================================== */
+    .card {
+      background: #fff;
+      border: 1px solid var(--tact-border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .callout {
+      border-left: 4px solid;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 13px 17px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .callout-info   { border-color: var(--pai-green);  background: var(--pai-green-light); }
+    .callout-warn   { border-color: var(--pai-amber);  background: var(--pai-amber-bg); }
+    .callout-tip    { border-color: #2980b9;            background: #eaf4fb; }
+    .callout-danger { border-color: #c0392b;            background: #fdf0ee; }
+    .callout strong { display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .7px; }
+    .callout-info   strong { color: var(--pai-green-dark); }
+    .callout-warn   strong { color: var(--pai-amber); }
+    .callout-tip    strong { color: #2371a0; }
+    .callout-danger strong { color: #a93226; }
+
+    /* =====================================================================
+       CODE
+    ===================================================================== */
+    code {
+      font-family: 'Source Code Pro', 'Courier New', monospace;
+      font-size: 12.5px;
+      background: var(--code-inline-bg);
+      color: var(--pai-green-dark);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(46,94,62,.15);
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      font-family: 'Source Code Pro', 'Courier New', monospace;
+      font-size: 13px;
+      padding: 18px 22px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin-bottom: 20px;
+      line-height: 1.65;
+      box-shadow: var(--shadow-sm);
+    }
+    pre code { background: none; color: inherit; padding: 0; border-radius: 0; border: none; font-size: inherit; }
+    .cm { color: #7a9e8b; } /* commento */
+    .kw { color: #d19a66; } /* keyword */
+    .st { color: #98c379; } /* stringa */
+    .fn { color: #61afef; } /* funzione */
+
+    /* =====================================================================
+       STEP INDICATORS
+    ===================================================================== */
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { counter-increment: step; display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+    .steps li::before {
+      content: counter(step);
+      min-width: 36px; height: 36px;
+      background: var(--pai-green); color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Copse', serif; font-size: 15px;
+      flex-shrink: 0; margin-top: 1px;
+      box-shadow: 0 2px 6px rgba(46,94,62,.35);
+    }
+    .steps li > div { flex: 1; }
+    .steps li strong { display: block; margin-bottom: 4px; font-size: 15px; color: var(--tact-text-dark); }
+
+    /* =====================================================================
+       TABLES
+    ===================================================================== */
+    .table-wrap { overflow-x: auto; margin-bottom: 22px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; box-shadow: var(--shadow-sm); border-radius: var(--radius); overflow: hidden; }
+    thead { background: var(--pai-green); }
+    thead th { padding: 11px 15px; text-align: left; font-weight: 700; color: #fff; font-size: 13px; }
+    tbody tr { border-bottom: 1px solid #f0f0f0; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--pai-green-light); }
+    tbody td { padding: 10px 15px; vertical-align: top; }
+    tbody td:first-child { font-weight: 600; color: var(--pai-green-dark); }
+
+    /* =====================================================================
+       WORKFLOW DIAGRAM
+    ===================================================================== */
+    .workflow {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      margin: 22px 0 30px; padding: 20px;
+      background: #fff; border: 1px solid var(--tact-border);
+      border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }
+    .wf-box {
+      background: var(--pai-green); color: #fff;
+      padding: 12px 18px; border-radius: var(--radius);
+      font-size: 12.5px; font-weight: 700; text-align: center; min-width: 108px;
+      line-height: 1.5; box-shadow: 0 2px 6px rgba(46,94,62,.25);
+    }
+    .wf-box.optional { background: var(--pai-amber); box-shadow: 0 2px 6px rgba(192,125,46,.25); }
+    .wf-box.bypass   { background: #555; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+    .wf-arrow { color: var(--pai-green-mid); font-size: 22px; font-weight: 700; padding: 0 2px; flex-shrink: 0; }
+
+    /* =====================================================================
+       DIAGNOSTICS CHECKLIST
+    ===================================================================== */
+    .diag-list { list-style: none; padding: 0; margin-bottom: 20px; }
+    .diag-list li {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .diag-list li:last-child { border-bottom: none; }
+    .diag-num {
+      min-width: 24px; height: 24px;
+      background: var(--pai-green-light);
+      color: var(--pai-green-dark);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+    .diag-list li > div strong { display: block; color: var(--tact-text-dark); }
+    .diag-list li > div span { font-size: 13px; color: var(--tact-text-light); }
+
+    /* =====================================================================
+       TABS
+    ===================================================================== */
+    .tab-container { margin-bottom: 28px; }
+    .tab-buttons { display: flex; border-bottom: 2px solid var(--tact-border); gap: 2px; }
+    .tab-btn {
+      background: none; border: none; padding: 10px 18px; cursor: pointer;
+      font-size: 13.5px; font-family: 'Noto Sans', sans-serif;
+      color: var(--tact-text-light); border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: color .18s, border-color .18s; font-weight: 700;
+    }
+    .tab-btn:hover { color: var(--pai-green); }
+    .tab-btn.active { color: var(--pai-green); border-bottom-color: var(--pai-green); }
+    .tab-content {
+      display: none; background: #fff;
+      border: 1px solid var(--tact-border); border-top: none;
+      padding: 20px 22px; border-radius: 0 0 var(--radius) var(--radius); font-size: 14px;
+    }
+    .tab-content.active { display: block; }
+
+    /* =====================================================================
+       SECTION ANCHORS
+    ===================================================================== */
+    .section-anchor { display: block; position: relative; top: calc(-1 * var(--header-h) - 20px); visibility: hidden; }
+
+    /* =====================================================================
+       PILLS / BADGE
+    ===================================================================== */
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; vertical-align: middle; }
+    .pill-green  { background: var(--pai-green-light); color: var(--pai-green-dark); border: 1px solid var(--pai-green-mid); }
+    .pill-amber  { background: var(--pai-amber-bg);    color: #8a5a10;              border: 1px solid var(--pai-amber); }
+    .pill-gray   { background: #f0f0f0;                color: #555;                 border: 1px solid #ccc; }
+    .pill-new    { background: #fff3cd;                color: #856404;              border: 1px solid #ffc107; }
+
+    /* =====================================================================
+       FOOTER
+    ===================================================================== */
+    footer {
+      background: var(--tact-header); color: rgba(255,255,255,.55);
+      text-align: center; padding: 30px 24px; font-size: 13px;
+      border-top: 2px solid var(--pai-green-dark);
+    }
+    footer a { color: var(--pai-amber-light); }
+    footer a:hover { color: #fff; text-decoration: none; }
+    .footer-inner { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+    footer strong { color: #fff; }
+
+    /* =====================================================================
+       RESPONSIVE
+    ===================================================================== */
+    @media (max-width: 820px) {
+      aside { display: none; }
+      main { padding: 24px 20px 64px; }
+      .header-nav { display: none; }
+      h1 { font-size: 1.65rem; }
+      .hero { padding: 26px 22px; }
+      .hero::before { display: none; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .workflow { flex-direction: column; align-items: flex-start; }
+      .pyai-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER
+================================================================ -->
+<header>
+  <div class="header-logo">Δ</div>
+  <a href="https://pyarchinit.org" target="_blank" class="header-brand">
+    <span class="header-brand-name">pyarchinit</span>
+    <span class="header-brand-sub">Archaeological Tools</span>
+  </a>
+  <div class="header-divider"></div>
+  <span class="header-plugin-name">DEM Volume Calculator</span>
+  <nav class="header-nav">
+    <a href="https://github.com/pyarchinit/dem-volume-calculator/issues" target="_blank">Segnala bug</a>
+    <a href="https://github.com/pyarchinit/dem-volume-calculator" target="_blank" class="btn-primary">GitHub</a>
+    <span class="badge-version">v1.3.0</span>
+  </nav>
+</header>
+
+<!-- ================================================================
+     LAYOUT
+================================================================ -->
+<div class="wrapper">
+
+  <!-- ——— SIDEBAR ——— -->
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Introduzione</div>
+      <a href="#overview"      class="sidebar-link active"><span class="icon">🏠</span>Panoramica</a>
+      <a href="#pyarchinit"    class="sidebar-link"><span class="icon">⚱️</span>Ecosistema pyArchInit</a>
+      <a href="#requisiti"     class="sidebar-link"><span class="icon">⚙️</span>Requisiti</a>
+      <a href="#installazione" class="sidebar-link"><span class="icon">📦</span>Installazione</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Utilizzo</div>
+      <a href="#workflow"      class="sidebar-link"><span class="icon">🔄</span>Flusso di lavoro</a>
+      <a href="#tab-calcoli"   class="sidebar-link"><span class="icon">📐</span>Tab Calcoli</a>
+      <a href="#input-dati"    class="sidebar-link"><span class="icon">📂</span>Input dati</a>
+      <a href="#dem-raster"    class="sidebar-link"><span class="icon">🗺️</span>DEM pre-esistenti</a>
+      <a href="#opzioni"       class="sidebar-link"><span class="icon">🔧</span>Opzioni raster</a>
+      <a href="#operazioni"    class="sidebar-link"><span class="icon">▶️</span>Operazioni</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Report &amp; Output</div>
+      <a href="#tab-report"    class="sidebar-link"><span class="icon">📄</span>Tab Report</a>
+      <a href="#ai-report"     class="sidebar-link"><span class="icon">🤖</span>Provider AI</a>
+      <a href="#pdf-struttura" class="sidebar-link"><span class="icon">📑</span>Struttura PDF</a>
+      <a href="#salvataggio"   class="sidebar-link"><span class="icon">💾</span>Salva elaborazione</a>
+      <a href="#output"        class="sidebar-link"><span class="icon">📁</span>File di output</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Riferimento tecnico</div>
+      <a href="#interpolazione"  class="sidebar-link"><span class="icon">📊</span>Metodi interpolazione</a>
+      <a href="#diagnostica"     class="sidebar-link"><span class="icon">🩺</span>Diagnostica Ollama</a>
+      <a href="#dep-checker"     class="sidebar-link"><span class="icon">📥</span>Installazione auto</a>
+      <a href="#troubleshooting" class="sidebar-link"><span class="icon">🔍</span>Risoluzione problemi</a>
+      <a href="#changelog"       class="sidebar-link"><span class="icon">📋</span>Changelog</a>
+    </div>
+  </aside>
+
+  <!-- ——— MAIN ——— -->
+  <main>
+
+    <!-- HERO -->
+    <span class="section-anchor" id="overview"></span>
+    <div class="hero">
+      <h1>DEM Volume Calculator</h1>
+      <p class="hero-desc">
+        Plugin QGIS 3 per il calcolo del volume di scavo o riporto dalla differenza
+        tra due superfici DEM generate da punti quotati. Supporta interpolazione IDW, TIN
+        e Kriging, genera report PDF certificati con testo AI e verifica l'integrità dei
+        dati tramite hash SHA-256.
+      </p>
+      <div class="hero-meta">
+        <span>📌 QGIS ≥ 3.28</span>
+        <span>🐍 Python 3.8+</span>
+        <span>👤 Luca Mandolesi</span>
+        <span>🔖 v1.3.0</span>
+        <span>📂 Categoria: Raster</span>
+        <span>🏛️ pyArchInit</span>
+      </div>
+    </div>
+
+    <!-- BANNER PYARCHINIT -->
+    <span class="section-anchor" id="pyarchinit"></span>
+    <div class="pyai-banner">
+      <div class="pyai-banner-logo">⚱️</div>
+      <div class="pyai-banner-text">
+        <div class="pyai-banner-title">Parte dell'ecosistema pyArchInit — Gestione dati archeologici con QGIS</div>
+        <div class="pyai-banner-desc">
+          <strong style="color:rgba(255,255,255,.9)">pyArchInit</strong> è un framework open source per la gestione integrata dei dati di scavo archaeologico su piattaforma GIS.
+          Nato nel 2005, consente di documentare unità stratigrafiche, materiali, campioni e georeferenziare ogni dato
+          direttamente in QGIS. Il <strong style="color:rgba(255,255,255,.9)">DEM Volume Calculator</strong> si integra nell'ecosistema
+          per calcolare volumi di scavo e riporto a partire dai punti quotati rilevati sul campo,
+          producendo report tecnici certificati direttamente utilizzabili nella documentazione di scavo.
+        </div>
+      </div>
+      <a href="https://pyarchinit.org" target="_blank" class="pyai-banner-link">→ pyarchinit.org</a>
+    </div>
+
+    <!-- FEATURES GRID -->
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feat-icon">📂</span>
+        <h4>Formati supportati</h4>
+        <p>CSV (auto-detect separatore), Shapefile, GeoTIFF, ASC, GRD, IMG, FLT, BIL, DEM, HGT, NetCDF e tutti i formati GDAL.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">📊</span>
+        <h4>Tre metodi di interpolazione</h4>
+        <p>IDW (GDAL), TIN/Delaunay (GDAL), Kriging RBF thin_plate_spline (scipy) — con maschera convex hull post-interpolazione.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">⛰️</span>
+        <h4>Differenza &amp; Volume</h4>
+        <p>Calcola UP−DOWN o DOWN−UP pixel per pixel con ricampionamento bilineare GDAL e integrazione numerica del volume.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">🤖</span>
+        <h4>Report AI certificato</h4>
+        <p>PDF A4 in 5 capitoli con testo tecnico-legale generato da Ollama, OpenAI o Anthropic Claude. System prompt specializzato per computi metrici di scavo.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">🔒</span>
+        <h4>Hash SHA-256</h4>
+        <p>Ogni DEM prodotto viene firmato con SHA-256 per garantire integrità e tracciabilità del dato nel report ufficiale.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">💾</span>
+        <h4>Salva elaborazione</h4>
+        <p>Esporta in cartella: DEM GeoTIFF, report PDF, shapefile convex hull punti UP/DOWN e shapefile extent dei tre raster.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">🩺</span>
+        <h4>Diagnostica Ollama</h4>
+        <p>6 check automatici: binario, processo, variabile d'ambiente, connettività API, modelli installati, GPU (NVIDIA/AMD/Intel).</p>
+      </div>
+      <div class="feature-card">
+        <span class="feat-icon">📥</span>
+        <h4>Installazione automatica</h4>
+        <p>Il dep_checker rileva i moduli mancanti (ReportLab, ecc.) e li installa via pip all'avvio con dialog di progresso integrato.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         REQUISITI
+    ============================================================ -->
+    <span class="section-anchor" id="requisiti"></span>
+    <h2><span class="section-icon">⚙️</span>Requisiti</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Componente</th><th>Versione minima</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>QGIS</td><td>3.28</td><td>Incluso in qualsiasi installazione QGIS recente (LTR o latest)</td></tr>
+          <tr><td>Python</td><td>3.8+</td><td>Fornito da QGIS; nessuna installazione aggiuntiva richiesta</td></tr>
+          <tr><td>GDAL / OGR</td><td>3.x</td><td>Incluso in QGIS; usato per interpolazione, warp e I/O raster</td></tr>
+          <tr><td>NumPy</td><td>1.20+</td><td>Incluso in QGIS; usato per calcoli raster e matriciali</td></tr>
+          <tr><td>PyQt5</td><td>5.15+</td><td>Incluso in QGIS; framework GUI del plugin</td></tr>
+          <tr><td>ReportLab <span class="pill pill-amber">opzionale</span></td><td>3.6+</td><td>Necessario per la generazione PDF. Il dep_checker propone l'installazione automatica.</td></tr>
+          <tr><td>SciPy <span class="pill pill-amber">opzionale</span></td><td>1.7+</td><td>Necessario per il metodo Kriging (<code>RBFInterpolator</code>). Senza: fallback automatico a IDW.</td></tr>
+          <tr><td>Ollama <span class="pill pill-amber">opzionale</span></td><td>qualsiasi</td><td>Runtime AI locale; auto-discovery multi-porta. Nessuna API key richiesta.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>ℹ️ Il plugin funziona anche senza i moduli opzionali</strong>
+      Il calcolo di DEM, differenza e volume funziona sempre. ReportLab è necessario solo per il PDF;
+      SciPy solo per Kriging; Ollama/OpenAI/Anthropic solo per il testo AI nel report.
+      All'avvio, <code>dep_checker.py</code> verifica i moduli e propone l'installazione automatica.
+    </div>
+
+    <!-- ============================================================
+         INSTALLAZIONE
+    ============================================================ -->
+    <span class="section-anchor" id="installazione"></span>
+    <h2><span class="section-icon">📦</span>Installazione</h2>
+
+    <h3>Metodo 1 – da ZIP (consigliato)</h3>
+    <ol class="steps">
+      <li>
+        <div>
+          <strong>Scarica il file ZIP</strong>
+          Dalla pagina GitHub scarica <code>dem_volume_calculator.zip</code> dalla sezione <em>Releases</em>
+          oppure tramite <em>Code → Download ZIP</em>.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Installa da ZIP in QGIS</strong>
+          In QGIS: <em>Plugin → Gestisci e installa plugin → Installa da ZIP</em>,
+          seleziona il file e clicca <em>Installa plugin</em>.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Attiva il plugin</strong>
+          Nella scheda <em>Installati</em>, abilita la spunta accanto a <strong>DEM Volume Calculator</strong>.
+          L'icona Δ compare nella barra strumenti Raster.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Installazione automatica dei moduli</strong>
+          Al primo avvio, il plugin controlla ReportLab. Se mancante, mostra un dialog per installarla
+          automaticamente con pip (con progress bar). <strong>Riavviare QGIS dopo l'installazione.</strong>
+        </div>
+      </li>
+    </ol>
+
+    <h3>Metodo 2 – copia manuale della cartella</h3>
+    <p>Copia la cartella <code>dem_volume_calculator/</code> nella directory plugin di QGIS:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sistema operativo</th><th>Percorso</th></tr></thead>
+        <tbody>
+          <tr><td>Windows</td><td><code>%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\</code></td></tr>
+          <tr><td>Linux</td><td><code>~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/</code></td></tr>
+          <tr><td>macOS</td><td><code>~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Installazione manuale moduli opzionali</h3>
+    <p>Se si preferisce installare manualmente dalla <strong>Console Python di QGIS</strong>
+       (<em>Plugin → Console Python</em>):</p>
+    <pre><code><span class="cm"># ReportLab — generazione report PDF</span>
+<span class="kw">import</span> subprocess, sys
+subprocess.check_call([sys.executable, <span class="st">'-m'</span>, <span class="st">'pip'</span>, <span class="st">'install'</span>, <span class="st">'reportlab'</span>])
+
+<span class="cm"># SciPy — metodo Kriging (RBFInterpolator)</span>
+subprocess.check_call([sys.executable, <span class="st">'-m'</span>, <span class="st">'pip'</span>, <span class="st">'install'</span>, <span class="st">'scipy'</span>])</code></pre>
+
+    <div class="callout callout-warn">
+      <strong>⚠️ Windows / OSGeo4W</strong>
+      Su Windows il dep_checker prova prima <code>pip install --user</code>, poi senza flag.
+      Se entrambi falliscono, usa l'<strong>OSGeo4W Shell</strong> come amministratore:
+      <code>pip install reportlab scipy</code>. Riavviare sempre QGIS dopo l'installazione.
+    </div>
+
+    <!-- ============================================================
+         WORKFLOW
+    ============================================================ -->
+    <span class="section-anchor" id="workflow"></span>
+    <h2><span class="section-icon">🔄</span>Flusso di lavoro</h2>
+
+    <p>Il plugin segue un flusso sequenziale in tre passi. <strong>Esegui Tutto</strong> li concatena in automatico.</p>
+
+    <div class="workflow">
+      <div class="wf-box">📂<br>Carica punti<br>quotati</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box">⛰️<br>Passo 1<br>Genera DEM</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box">➖<br>Passo 2<br>Differenza</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box">📐<br>Passo 3<br>Volume</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box optional">📄<br>Report PDF<br><em style="font-size:11px;font-weight:400">opzionale</em></div>
+    </div>
+
+    <p><strong>Percorso alternativo — DEM pre-esistenti:</strong> se si dispone già di raster DEM
+       (da drone, da precedente calcolo, ecc.) si caricano saltando il passo 1.</p>
+
+    <div class="workflow">
+      <div class="wf-box bypass">📁<br>Carica DEM<br>pre-esistenti</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box">➖<br>Passo 2<br>Differenza</div>
+      <div class="wf-arrow">→</div>
+      <div class="wf-box">📐<br>Passo 3<br>Volume</div>
+    </div>
+
+    <!-- ============================================================
+         TAB CALCOLI
+    ============================================================ -->
+    <span class="section-anchor" id="tab-calcoli"></span>
+    <h2><span class="section-icon">📐</span>Tab Calcoli</h2>
+
+    <p>Il tab principale è suddiviso in quattro sezioni:
+       <em>Input Dati</em>, <em>DEM Raster Pre-esistenti</em>, <em>Opzioni Raster</em> e <em>Azioni</em>.</p>
+
+    <!-- INPUT DATI -->
+    <span class="section-anchor" id="input-dati"></span>
+    <h3>Sezione — Input Dati</h3>
+
+    <p>Richiede due set di punti quotati per definire le due superfici:</p>
+    <ul>
+      <li><strong>DEM UP</strong> — superficie superiore (es. piano di campagna originale, quota ante-scavo).</li>
+      <li><strong>DEM DOWN</strong> — superficie inferiore (es. fondo dello scavo, quota post-scavo).</li>
+    </ul>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Modalità</th><th>Come si usa</th><th>Formati</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>File su disco</td>
+            <td>Pulsante <em>"Carica file quota SUPERIORE/INFERIORE"</em></td>
+            <td><code>.csv</code>, <code>.shp</code></td>
+          </tr>
+          <tr>
+            <td>Layer Panel</td>
+            <td>Pulsante <em>"Da Layer Panel"</em> — usa il layer vettoriale puntuale attivo in QGIS</td>
+            <td>Layer vettoriale Point / PointZ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Dopo il caricamento il plugin rileva automaticamente i campi disponibili e popola il menu
+       <strong>Campo quota</strong>. Il campo Z viene pre-selezionato automaticamente cercando
+       i nomi: <code>Z</code>, <code>QUOTA</code>, <code>ELEVATION</code>, <code>ELEV</code>,
+       <code>HEIGHT</code>, <code>ALT</code> (e le varianti in minuscolo).
+       Per CSV senza intestazione, il default è <code>Colonna_3</code> (terza colonna).</p>
+
+    <div class="callout callout-tip">
+      <strong>💡 CSV — auto-detect separatore e intestazione</strong>
+      Il plugin analizza i primi 4 KB del file per rilevare il separatore (virgola, punto e virgola, tabulazione).
+      Se la prima riga contiene solo valori numerici, viene trattata come dato (nessuna intestazione) e i
+      campi denominati <code>Colonna_1</code>, <code>Colonna_2</code>, … <code>Colonna_N</code>.
+    </div>
+
+    <!-- DEM RASTER -->
+    <span class="section-anchor" id="dem-raster"></span>
+    <h3>Sezione — DEM Raster Pre-esistenti</h3>
+
+    <p>Se si dispone già di file raster DEM, è possibile caricarli direttamente saltando il passo 1.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sorgente</th><th>Azione</th></tr></thead>
+        <tbody>
+          <tr><td>File raster su disco</td><td>Pulsante <em>"Carica file…"</em> per DEM UP o DEM DOWN</td></tr>
+          <tr><td>Layer raster nel Panel</td><td>Pulsante <em>"Da Layer Panel"</em> — usa il layer raster attivo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Formati raster supportati:</strong> <code>.tif/.tiff</code> (GeoTIFF), <code>.asc</code> (ESRI ASCII Grid),
+       <code>.grd</code> (Surfer Grid), <code>.img</code> (ERDAS Imagine), <code>.flt/.bil</code> (ESRI Float/BIL),
+       <code>.dem</code>, <code>.hgt</code> (SRTM HGT), <code>.nc</code> (NetCDF) e tutti i formati GDAL.</p>
+
+    <p>Al caricamento il plugin esegue una <strong>validazione automatica</strong> (<code>validate_raster_dem()</code>):
+       controlla la presenza di almeno una banda, il tipo di dato e l'assenza di errori GDAL. Gli avvisi
+       (es. nodata non impostato) vengono mostrati nel log senza bloccare il caricamento.</p>
+
+    <div class="callout callout-info">
+      <strong>ℹ️ Passo 1 saltato automaticamente</strong>
+      Se entrambi i DEM raster sono caricati, il pulsante <em>"1. Genera DEM"</em> viene ignorato
+      e si può procedere direttamente con il passo 2 (Differenza) o "Esegui Tutto".
+    </div>
+
+    <!-- OPZIONI RASTER -->
+    <span class="section-anchor" id="opzioni"></span>
+    <h3>Sezione — Opzioni Raster</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Parametro</th><th>Default</th><th>Descrizione</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Dimensione cella — tutti</td>
+            <td><code>1.0 m</code></td>
+            <td>Aggiorna in cascata DEM UP, DOWN e Risultato con lo stesso valore.</td>
+          </tr>
+          <tr>
+            <td>Dimensione cella DEM UP</td>
+            <td><code>1.0 m</code></td>
+            <td>Risoluzione spaziale del raster superficie superiore.</td>
+          </tr>
+          <tr>
+            <td>Dimensione cella DEM DOWN</td>
+            <td><code>1.0 m</code></td>
+            <td>Risoluzione spaziale del raster superficie inferiore.</td>
+          </tr>
+          <tr>
+            <td>Dimensione cella DEM Risultato</td>
+            <td><code>1.0 m</code></td>
+            <td>Risoluzione del raster differenza, usata nel calcolo volume.</td>
+          </tr>
+          <tr>
+            <td>Codice EPSG</td>
+            <td><code>32632</code></td>
+            <td>CRS del progetto (WGS 84 / UTM zona 32N). Il plugin proietta i punti nel CRS indicato.</td>
+          </tr>
+          <tr>
+            <td>Direzione sottrazione</td>
+            <td>UP − DOWN</td>
+            <td><em>UP − DOWN</em> per lo scavo; <em>DOWN − UP</em> per il riporto.</td>
+          </tr>
+          <tr>
+            <td>Metodo di interpolazione</td>
+            <td>IDW</td>
+            <td>IDW, TIN o Kriging. Vedi <a href="#interpolazione">Metodi di interpolazione</a>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- OPERAZIONI -->
+    <span class="section-anchor" id="operazioni"></span>
+    <h3>Sezione — Azioni</h3>
+
+    <ul class="steps">
+      <li>
+        <div>
+          <strong>Passo 1 — Genera DEM UP e DEM DOWN</strong>
+          Interpola i punti quotati e produce due GeoTIFF float32 in cartella temporanea
+          (<code>dem_volume_calc_XXXX/dem_up.tif</code>, <code>dem_down.tif</code>).
+          Eseguito in un <strong>QThread separato</strong>; la barra di avanzamento mostra 10% → 50% → 100%.
+          Dopo l'interpolazione applica la <strong>maschera convex hull</strong> dei punti di input
+          (celle fuori dall'inviluppo convesso → NoData). Al termine i raster sono caricati nel Layer Panel.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Passo 2 — Calcola Differenza</strong>
+          Calcola <em>DEM UP − DEM DOWN</em> (o inverso) pixel per pixel.
+          Se i due DEM hanno risoluzioni o estensioni diverse, vengono ricampionati
+          (<code>gdal.Warp</code>, algoritmo bilineare) all'extent comune e alla risoluzione target.
+          Il raster differenza (<code>dem_diff.tif</code>) viene caricato nel Layer Panel.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Passo 3 — Calcola Volume</strong>
+          Somma i valori del raster differenza (opzionalmente solo i pixel positivi)
+          e moltiplica per l'area del pixel (<em>cell_size²</em>). Il log mostra:
+          volume in m³, statistiche (min/max/media/std), numero di pixel validi,
+          hash SHA-256 dei file DEM.
+        </div>
+      </li>
+    </ul>
+
+    <div class="card">
+      <h3 style="margin-top:0">⚡ Esegui Tutto (1 + 2 + 3)</h3>
+      <p style="margin:0">
+        Concatena automaticamente i tre passi in un'unica operazione.
+        Ogni passo viene registrato con timestamp in <code>_steps_log</code>
+        e incluso nella sezione <em>Metodologia</em> del report PDF.
+      </p>
+    </div>
+
+    <div class="callout callout-tip">
+      <strong>💡 Opzioni risultati (spunte in fondo al tab)</strong>
+      <strong>Aggiungi raster risultanti al progetto QGIS</strong> (default: ✔) — carica i raster nel Layer Panel al termine.<br>
+      <strong>Considera solo valori positivi per il volume</strong> (default: ✔) — ignora i pixel negativi nel calcolo
+      (aree dove DOWN &gt; UP per errori di rilievo o piccole disomogeneità).
+    </div>
+
+    <!-- ============================================================
+         TAB REPORT
+    ============================================================ -->
+    <span class="section-anchor" id="tab-report"></span>
+    <h2><span class="section-icon">📄</span>Tab Report</h2>
+
+    <p>Il tab <em>Report</em> genera un documento PDF tecnico certificato con:</p>
+    <ul>
+      <li>Screenshot cartografici di DEM UP e DEM DOWN con sfondo OpenStreetMap (1600×1200 px, 150 DPI, ricampionamento bilineare).</li>
+      <li>Dati numerici: volume, statistiche raster, parametri di interpolazione.</li>
+      <li>Hash SHA-256 di ciascun DEM per la tracciabilità del dato.</li>
+      <li>Log dei passaggi operativi con timestamp (da <code>_steps_log</code>).</li>
+      <li>Testo interpretativo generato da un modello AI (Ollama, OpenAI o Anthropic).</li>
+      <li>Logo aziendale e immagine firma del responsabile del calcolo.</li>
+    </ul>
+
+    <div class="callout callout-warn">
+      <strong>⚠️ Prerequisito ReportLab</strong>
+      La generazione PDF richiede <strong>ReportLab ≥ 3.6</strong>. Il pulsante
+      <em>Genera Report PDF</em> è disabilitato se il modulo non è installato.
+      Usare il dep_checker (avvio automatico) o installare manualmente (vedi <a href="#installazione">Installazione</a>).
+    </div>
+
+    <h3>Sezione — Dati Relazione e Firma</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Campo</th><th>Descrizione</th></tr></thead>
+        <tbody>
+          <tr><td>Data relazione</td><td>Preimpostata alla data corrente; modificabile con calendario popup.</td></tr>
+          <tr><td>Logo aziendale</td><td>Immagine PNG/JPG inserita nella copertina. Facoltativa.</td></tr>
+          <tr><td>Nome firmatario</td><td>Nome e cognome del responsabile — appare nella firma del report.</td></tr>
+          <tr><td>File firma (PNG)</td><td>Immagine della firma autografa in PNG (preferibilmente a sfondo trasparente).</td></tr>
+          <tr><td>Altezza firma (mm)</td><td>Dimensione immagine firma nel PDF: 10–60 mm. Default: 20 mm.</td></tr>
+          <tr><td>Cartella output</td><td>Directory di destinazione per il PDF generato.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AI PROVIDER -->
+    <span class="section-anchor" id="ai-report"></span>
+    <h3>Sezione — Provider AI</h3>
+
+    <div class="callout callout-info">
+      <strong>ℹ️ System prompt specializzato per archeologia</strong>
+      Il testo AI viene generato con un system prompt specializzato per
+      <em>"computi metrici di opere in terra (scavi, riporti, movimenti terra)"</em>
+      in italiano tecnico, con focus su sbalzo di quote, volumi e applicazione nei computi metrici.
+      Il testo dell'introduzione è limitato a 5.000 battute (~700-800 parole).
+    </div>
+
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(event,'ollama')">🦙 Ollama (locale)</button>
+        <button class="tab-btn" onclick="switchTab(event,'openai')">🌐 OpenAI</button>
+        <button class="tab-btn" onclick="switchTab(event,'anthropic')">🤖 Anthropic</button>
+      </div>
+
+      <div id="tab-ollama" class="tab-content active">
+        <h4>Ollama — AI locale, gratuito, privacy-safe</h4>
+        <p>I dati <strong>non lasciano il computer</strong>. Nessuna API key richiesta.</p>
+        <ul>
+          <li>Scarica e installa Ollama da <a href="https://ollama.com" target="_blank">ollama.com</a> (Windows, macOS, Linux).</li>
+          <li><strong>Auto-discovery multi-porta:</strong> il plugin cerca Ollama su <code>localhost</code>
+              e <code>127.0.0.1</code> sulle porte <code>11434</code>, <code>11435</code>,
+              <code>11436</code>, <code>8080</code>, <code>8081</code>.
+              Usa la variabile d'ambiente <code>OLLAMA_HOST</code> per configurare un host personalizzato.</li>
+          <li>Modello consigliato: <code>llama3.2:latest</code>. Scaricabile direttamente dal plugin.</li>
+          <li>Il download del modello usa <strong>streaming JSON</strong> con aggiornamento bytes in tempo reale e pulsante Annulla.</li>
+          <li>Evita modelli molto piccoli (es. <code>gemma3:1b</code>, <code>tinyllama</code>) che potrebbero restituire errore 500.</li>
+        </ul>
+        <div class="callout callout-tip" style="margin-top:14px;margin-bottom:0">
+          <strong>💡 Download modello dal plugin</strong>
+          Seleziona Ollama come provider, scegli il modello dall'elenco e clicca <em>"Scarica modello"</em>.
+          Un dialog mostra il terminale con il progresso in bytes e la barra percentuale.
+          Il download gira in <code>OllamaPullWorker</code> (QThread separato) e può essere annullato.
+        </div>
+      </div>
+
+      <div id="tab-openai" class="tab-content">
+        <h4>OpenAI — richiede API key e connessione internet</h4>
+        <ul>
+          <li>Ottieni la key su <a href="https://platform.openai.com" target="_blank">platform.openai.com</a>.</li>
+          <li>La key viene salvata in <code>~/.dem_volume_calc/api_keys.json</code> al termine della digitazione
+              (segnalato con un dialog che offre di aprire la cartella).</li>
+          <li>Modelli disponibili: <code>gpt-4o</code>, <code>gpt-4o-mini</code>, <code>gpt-4-turbo</code>,
+              <code>gpt-4.1</code>, <code>gpt-4.1-mini</code>, <code>gpt-4.1-nano</code>,
+              <code>o3</code>, <code>o3-mini</code>, <code>o4-mini</code>.</li>
+          <li>Supporto immagini (visione): screenshot delle mappe inviati come <code>data:image/png;base64</code> nei modelli vision.</li>
+          <li>In caso di HTTP 429: 3 tentativi con backoff esponenziale (30 s → 60 s → 120 s),
+              rispettando l'header <code>Retry-After</code> se presente.</li>
+        </ul>
+      </div>
+
+      <div id="tab-anthropic" class="tab-content">
+        <h4>Anthropic Claude — richiede API key e connessione internet</h4>
+        <ul>
+          <li>Ottieni la key su <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</li>
+          <li>La key viene salvata in <code>~/.dem_volume_calc/api_keys.json</code> (stesso file di OpenAI).</li>
+          <li>Modelli disponibili: <code>claude-sonnet-4-20250514</code>, <code>claude-opus-4-20250514</code>,
+              <code>claude-haiku-4-5-20251001</code>.</li>
+          <li>Header API richiesto: <code>anthropic-version: 2023-06-01</code> — incluso automaticamente.</li>
+          <li>Supporto immagini: le mappe DEM vengono incluse come blocchi <code>image/base64</code> nel messaggio user.</li>
+          <li>Stesso meccanismo di retry con backoff esponenziale per HTTP 429.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- STRUTTURA PDF -->
+    <span class="section-anchor" id="pdf-struttura"></span>
+    <h3>Struttura del report PDF</h3>
+
+    <p>Il PDF (formato A4, font Cambria su Windows o Times-Roman su altri sistemi) è strutturato in cinque capitoli:</p>
+    <ol>
+      <li><strong>Copertina</strong> — titolo, autore, data, logo aziendale, firma con altezza configurabile.</li>
+      <li><strong>Introduzione</strong> — testo AI (max ~800 parole) che descrive il contesto del calcolo volume in italiano tecnico.</li>
+      <li><strong>Metodologia</strong> — algoritmo di interpolazione con formula matematica dettagliata,
+          parametri GDAL usati, hash SHA-256 dei DEM, log dei passaggi operativi con timestamp.</li>
+      <li><strong>Risultati</strong> — volume in m³ (evidenziato graficamente), statistiche raster
+          (min/max/media/std/pixel validi), screenshot DEM UP e DEM DOWN a sfondo OSM (1600×1200 px, 150 DPI).</li>
+      <li><strong>Conclusioni</strong> — testo AI con interpretazione tecnica del risultato,
+          applicabilità nel computo metrico di scavo/riporto.</li>
+    </ol>
+
+    <div class="callout callout-info">
+      <strong>ℹ️ Nome file PDF</strong>
+      Il PDF viene salvato come <code>report_volume_YYYYMMDD_HHMMSS.pdf</code> nella cartella output selezionata.
+      L'ultimo PDF generato viene ricordato dal plugin per essere incluso nella funzione <em>Salva elaborazione</em>.
+    </div>
+
+    <!-- ============================================================
+         SALVATAGGIO
+    ============================================================ -->
+    <span class="section-anchor" id="salvataggio"></span>
+    <h2><span class="section-icon">💾</span>Salva elaborazione</h2>
+
+    <p>Il pulsante <strong style="color:#1a5c1a">Salva elaborazione</strong> (in verde nella barra inferiore)
+       crea una sottocartella con nome a scelta e vi copia tutti i file prodotti:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>File</th><th>Tipo</th><th>Descrizione</th></tr></thead>
+        <tbody>
+          <tr><td><code>dem_up.tif</code></td><td>GeoTIFF float32</td><td>Raster DEM superficie superiore.</td></tr>
+          <tr><td><code>dem_down.tif</code></td><td>GeoTIFF float32</td><td>Raster DEM superficie inferiore.</td></tr>
+          <tr><td><code>dem_diff.tif</code></td><td>GeoTIFF float32</td><td>Raster differenza UP − DOWN.</td></tr>
+          <tr><td><code>report_*.pdf</code></td><td>PDF</td><td>Ultimo report PDF generato (se disponibile).</td></tr>
+          <tr><td><code>convex_hull_up.shp</code></td><td>Shapefile poligono</td><td>Convex hull dei punti quotati UP con campo <code>n_points</code>.</td></tr>
+          <tr><td><code>convex_hull_down.shp</code></td><td>Shapefile poligono</td><td>Convex hull dei punti quotati DOWN con campo <code>n_points</code>.</td></tr>
+          <tr><td><code>dem_extents.shp</code></td><td>Shapefile poligono</td><td>Bounding box (xmin/ymin/xmax/ymax) dei tre raster.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Al termine viene mostrato un riepilogo dei file salvati e un pulsante <em>"Apri cartella"</em>
+       per aprire la directory con il file manager di sistema.</p>
+
+    <div class="callout callout-warn">
+      <strong>⚠️ File temporanei</strong>
+      I raster vengono creati in una cartella temporanea di sistema
+      (<code>tempfile.mkdtemp(prefix='dem_volume_calc_')</code>) che viene cancellata al riavvio del SO.
+      Usare sempre <strong>Salva elaborazione</strong> per conservare i risultati.
+    </div>
+
+    <p>Il pulsante <strong style="color:#b00000">Azzera elaborazione</strong> interrompe eventuali thread in
+       esecuzione, cancella tutti i dati caricati, crea una nuova cartella temporanea e resetta la GUI allo stato iniziale.</p>
+
+    <!-- ============================================================
+         FILE DI OUTPUT
+    ============================================================ -->
+    <span class="section-anchor" id="output"></span>
+    <h2><span class="section-icon">📁</span>File di output</h2>
+
+    <h3>Raster GeoTIFF</h3>
+    <p>Tutti i raster prodotti sono in formato <strong>GeoTIFF float32</strong> con:</p>
+    <ul>
+      <li>CRS nel sistema di riferimento EPSG impostato dall'utente.</li>
+      <li>Valore NoData: <code>-9999.0</code>.</li>
+      <li>Maschera convex hull: le celle fuori dall'inviluppo convesso dei punti di input sono NoData.</li>
+      <li>Buffer automatico dell'extent del 5% per evitare troncatura ai bordi.</li>
+    </ul>
+
+    <h3>Statistiche nel log</h3>
+    <p>Al termine del passo 3, il log riporta:</p>
+    <ul>
+      <li>Volume totale in m³ (con indicazione se solo valori positivi o tutti).</li>
+      <li>Statistiche del raster differenza: min, max, media, deviazione standard.</li>
+      <li>Numero pixel validi (non-NoData) usati nel calcolo.</li>
+      <li>Hash SHA-256 di <code>dem_up.tif</code> e <code>dem_down.tif</code>.</li>
+    </ul>
+
+    <!-- ============================================================
+         METODI DI INTERPOLAZIONE
+    ============================================================ -->
+    <span class="section-anchor" id="interpolazione"></span>
+    <h2><span class="section-icon">📊</span>Metodi di interpolazione</h2>
+
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab(event,'idw')">IDW</button>
+        <button class="tab-btn" onclick="switchTab(event,'tin')">TIN</button>
+        <button class="tab-btn" onclick="switchTab(event,'kriging')">Kriging</button>
+      </div>
+
+      <div id="tab-idw" class="tab-content active">
+        <h4>IDW — Inverse Distance Weighting</h4>
+        <p>Media pesata delle quote dei punti circostanti con peso inversamente proporzionale
+           alla distanza (esponente: <em>p = 2.0</em>).</p>
+        <ul>
+          <li><strong>Implementazione:</strong> <code>gdal.Grid()</code> con algoritmo
+              <code>invdist:power=2.0:smoothing=0.0:radius1=MAX_EXTENT</code>.</li>
+          <li><strong>Post-processing:</strong> maschera convex hull tramite OGR + GDAL rasterize.</li>
+          <li><strong>Vantaggi:</strong> deterministico, veloce, nessuna dipendenza extra.</li>
+          <li><strong>Svantaggi:</strong> "bull's-eye" attorno ai punti di controllo.</li>
+          <li><strong>Ideale per:</strong> nuvole di punti dense e uniformi.</li>
+        </ul>
+      </div>
+
+      <div id="tab-tin" class="tab-content">
+        <h4>TIN — Triangulated Irregular Network (Delaunay)</h4>
+        <p>Triangolazione di Delaunay + interpolazione lineare all'interno di ogni triangolo.</p>
+        <ul>
+          <li><strong>Implementazione:</strong> <code>gdal.Grid()</code> con algoritmo
+              <code>linear:radius=MAX_EXTENT:nodata=-9999</code>.</li>
+          <li><strong>Post-processing:</strong> maschera convex hull applicata dopo la griglia.</li>
+          <li><strong>Vantaggi:</strong> rispetta esattamente i valori misurati; lineare a tratti.</li>
+          <li><strong>Svantaggi:</strong> discontinuità agli angoli dei triangoli; aree piatte senza punti.</li>
+          <li><strong>Ideale per:</strong> rilievi con distribuzione irregolare ma morfologicamente rappresentativa.</li>
+        </ul>
+      </div>
+
+      <div id="tab-kriging" class="tab-content">
+        <h4>Kriging — RBFInterpolator (thin_plate_spline)</h4>
+        <p>Interpolazione con funzioni base radiali (RBF) tramite kernel <em>thin plate spline</em>.</p>
+        <ul>
+          <li><strong>Implementazione:</strong> <code>scipy.interpolate.RBFInterpolator(kernel='thin_plate_spline')</code>
+              → output su griglia numpy → <code>gdal.GetDriverByName('GTiff').Create()</code>.</li>
+          <li><strong>Fallback automatico:</strong> se SciPy non è disponibile, usa IDW e lo segnala nel log.</li>
+          <li><strong>Post-processing:</strong> maschera convex hull applicata.</li>
+          <li><strong>Vantaggi:</strong> superficie più fluida; ottimo su dataset sparsi o irregolari.</li>
+          <li><strong>Svantaggi:</strong> più lento; richiede SciPy.</li>
+          <li><strong>Ideale per:</strong> superfici continue con pochi punti di rilievo.</li>
+        </ul>
+        <div class="callout callout-warn" style="margin-top:14px;margin-bottom:0">
+          <strong>⚠️ Dipendenza SciPy</strong>
+          Senza SciPy: fallback automatico a IDW. Il log riporta:
+          <em>"Scipy non disponibile — fallback a IDW"</em>.
+          Installare con: <code>pip install scipy</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         DIAGNOSTICA OLLAMA
+    ============================================================ -->
+    <span class="section-anchor" id="diagnostica"></span>
+    <h2><span class="section-icon">🩺</span>Diagnostica Ollama</h2>
+
+    <p>Il modulo <code>ollama_checker.py</code> esegue una diagnostica strutturata in 6 check
+       e restituisce un oggetto <code>OllamaDiagnostics</code> con report testuale.</p>
+
+    <div class="card" style="padding: 16px 20px;">
+      <ul class="diag-list">
+        <li>
+          <div class="diag-num">1</div>
+          <div>
+            <strong>Binario Ollama nel PATH</strong>
+            <span>Usa <code>shutil.which('ollama')</code>. Se trovato, esegue <code>ollama --version</code> per leggere la versione.</span>
+          </div>
+        </li>
+        <li>
+          <div class="diag-num">2</div>
+          <div>
+            <strong>Processo Ollama in esecuzione</strong>
+            <span>Windows: <code>tasklist /FI IMAGENAME eq ollama.exe</code>. Linux/macOS: <code>pgrep -x ollama</code>.</span>
+          </div>
+        </li>
+        <li>
+          <div class="diag-num">3</div>
+          <div>
+            <strong>Variabile d'ambiente OLLAMA_HOST</strong>
+            <span>Legge <code>$OLLAMA_HOST</code>. Se impostata, viene usata come URL preferenziale (accetta formato <code>host:port</code> o URL completo).</span>
+          </div>
+        </li>
+        <li>
+          <div class="diag-num">4</div>
+          <div>
+            <strong>Connettività API Ollama</strong>
+            <span>Controlla le porte <code>11434, 11435, 11436, 8080, 8081</code> su <code>localhost</code> e <code>127.0.0.1</code>.
+            Verifica risposta all'endpoint <code>/api/version</code> (fallback: endpoint root).</span>
+          </div>
+        </li>
+        <li>
+          <div class="diag-num">5</div>
+          <div>
+            <strong>Modelli installati</strong>
+            <span>Interroga <code>/api/tags</code>. Riporta nome e numero dei modelli. Se nessun modello: suggerisce <code>ollama pull llama3.2:latest</code>.</span>
+          </div>
+        </li>
+        <li>
+          <div class="diag-num">6</div>
+          <div>
+            <strong>Rilevamento GPU</strong>
+            <span>NVIDIA: <code>nvidia-smi --query-gpu=name,memory.total</code>. Windows: <code>wmic path win32_VideoController</code>. Linux: <code>lspci</code>. Non bloccante: senza GPU Ollama usa la CPU.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <h3>Utilizzo dalla Console Python di QGIS</h3>
+    <pre><code><span class="kw">from</span> dem_volume_calculator.processing.ollama_checker <span class="kw">import</span> run_diagnostics
+diag = <span class="fn">run_diagnostics</span>()
+<span class="fn">print</span>(diag.<span class="fn">summary</span>())      <span class="cm"># report testuale completo</span>
+<span class="fn">print</span>(diag.ollama_url)     <span class="cm"># URL scoperto</span>
+<span class="fn">print</span>(diag.installed_models)  <span class="cm"># lista modelli</span>
+<span class="fn">print</span>(diag.gpu_info)       <span class="cm"># informazioni GPU</span></code></pre>
+
+    <!-- ============================================================
+         DEP CHECKER
+    ============================================================ -->
+    <span class="section-anchor" id="dep-checker"></span>
+    <h2><span class="section-icon">📥</span>Installazione automatica moduli (dep_checker)</h2>
+
+    <p>Il modulo <code>dep_checker.py</code> gestisce il rilevamento e l'installazione automatica
+       dei moduli Python opzionali direttamente dall'interfaccia QGIS.</p>
+
+    <h3>Funzionamento</h3>
+    <ol>
+      <li>All'avvio del plugin, <code>log_missing()</code> segnala i moduli mancanti nel message bar e nel log QGIS (non bloccante).</li>
+      <li>Al primo click su una funzione che richiede un modulo mancante, <code>check_and_prompt()</code> mostra un dialog
+          con l'elenco dei moduli da installare e i comandi pip alternativi.</li>
+      <li>Se l'utente accetta, avvia l'installazione con una <strong>QProgressDialog</strong> (barra indeterminata).</li>
+      <li>L'installazione prova prima <code>pip install --user</code>, poi senza flag se fallisce.</li>
+      <li>Al termine mostra un dialog di conferma e avvisa di <strong>riavviare QGIS</strong> per rendere disponibili i moduli.</li>
+    </ol>
+
+    <div class="callout callout-info">
+      <strong>ℹ️ Modulo attualmente gestito</strong>
+      Il dep_checker gestisce attualmente <strong>ReportLab</strong> (per la generazione PDF).
+      SciPy non è incluso nel check automatico: il plugin gestisce la sua assenza
+      con un fallback diretto a IDW senza interrompere il flusso.
+    </div>
+
+    <!-- ============================================================
+         TROUBLESHOOTING
+    ============================================================ -->
+    <span class="section-anchor" id="troubleshooting"></span>
+    <h2><span class="section-icon">🔍</span>Risoluzione problemi</h2>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ "ReportLab non trovato" — PDF non generato</h3>
+      <p>Installare ReportLab via dep_checker (avvia il plugin e conferma nel dialog) o manualmente:</p>
+      <pre style="margin-bottom:0"><code>import subprocess, sys
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'reportlab'])</code></pre>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Kriging usa IDW (fallback automatico)</h3>
+      <p>SciPy non è installato. Il plugin usa IDW automaticamente. Per abilitare Kriging:</p>
+      <pre style="margin-bottom:0"><code>import subprocess, sys
+subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'scipy'])</code></pre>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Ollama non raggiungibile</h3>
+      <p>Verificare che il servizio Ollama sia in esecuzione:</p>
+      <pre><code><span class="cm"># Avvia Ollama (Linux / macOS)</span>
+ollama serve
+
+<span class="cm"># Verifica connettività</span>
+curl http://localhost:11434/api/version</code></pre>
+      <p style="margin-bottom:0">
+        Se Ollama gira su un host diverso, impostare <code>OLLAMA_HOST=http://&lt;ip&gt;:11434</code>
+        prima di avviare QGIS. Usare il tool di diagnostica per un report completo (vedi <a href="#diagnostica">Diagnostica Ollama</a>).
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Errore Ollama 404 — modello non trovato</h3>
+      <p style="margin:0">
+        Il modello selezionato non è installato localmente.
+        Scaricarlo con: <code>ollama pull &lt;nome_modello&gt;</code> oppure tramite il pulsante
+        <em>"Scarica modello"</em> nel tab Report.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Errore Ollama 500 — Internal Server Error</h3>
+      <p>Cause probabili:</p>
+      <ul style="margin-bottom:0">
+        <li>Modello troppo piccolo per il prompt (es. <code>gemma3:1b</code>, <code>tinyllama</code>) — usare <code>llama3.2</code>, <code>gemma3:4b</code>, <code>mistral</code>, <code>qwen2.5</code>.</li>
+        <li>RAM/VRAM insufficiente — chiudere altre applicazioni prima di generare il report.</li>
+        <li>Corruzione del modello — riscaricare con <code>ollama pull &lt;modello&gt;</code>.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Errore 429 — rate limit API (OpenAI / Anthropic)</h3>
+      <p style="margin:0">
+        Il plugin esegue automaticamente <strong>3 tentativi</strong> con backoff esponenziale
+        (30 s → 60 s → 120 s, rispettando l'header <code>Retry-After</code>).
+        Se persiste, verificare il saldo/crediti sul portale del provider.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ Il volume risulta 0 o negativo</h3>
+      <ul style="margin-bottom:0">
+        <li>Controllare la <strong>Direzione di sottrazione</strong>: per misurare uno scavo usare <em>UP − DOWN</em>.</li>
+        <li>Verificare che i due set di punti abbiano una <strong>sovrapposizione spaziale</strong> sufficiente.</li>
+        <li>Assicurarsi che il <strong>Campo quota</strong> contenga quote altimetriche (Z), non coordinate planimetriche.</li>
+        <li>Controllare che il <strong>codice EPSG</strong> corrisponda al sistema di riferimento dei punti.</li>
+        <li>Verificare che la spunta <em>"Considera solo valori positivi"</em> non escluda tutti i pixel.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">❌ I due DEM non si sovrappongono spazialmente</h3>
+      <p style="margin:0">
+        Il calcolo della differenza richiede un'area comune tra DEM UP e DEM DOWN.
+        Verificare che le nuvole di punti abbiano effettivamente una zona di sovrapposizione
+        e che il codice EPSG sia corretto. Se l'estensione comune è troppo piccola il plugin
+        genera un errore esplicito nel log.
+      </p>
+    </div>
+
+    <!-- ============================================================
+         CHANGELOG
+    ============================================================ -->
+    <span class="section-anchor" id="changelog"></span>
+    <h2><span class="section-icon">📋</span>Changelog</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Versione</th><th>Novità principali</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-green">1.3.0</span></td>
+            <td>
+              Pulsante <em>Salva elaborazione</em>: esporta DEM GeoTIFF, report PDF,
+              shapefile convex hull (con campo <code>n_points</code>) e shapefile extent dei raster.
+              Dialog "Apri cartella" al termine del salvataggio.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-gray">1.2.0</span></td>
+            <td>
+              Generazione PDF con ReportLab (A4 corretto, font Cambria su Windows),
+              dep_checker con installazione automatica moduli e QProgressDialog,
+              sezione firma con altezza configurabile (10–60 mm), fix font Cambria.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-gray">1.1.0</span></td>
+            <td>
+              Report PDF certificato con testo AI (Ollama / OpenAI / Anthropic),
+              hash SHA-256 dei DEM, struttura 5 capitoli, log passaggi con timestamp,
+              auto-discovery URL Ollama multi-porta, download modelli con streaming.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-gray">1.0.0</span></td>
+            <td>
+              Prima release: interpolazione IDW / TIN / Kriging, maschera convex hull,
+              calcolo differenza raster (gdal.Warp bilineare), calcolo volume,
+              integrazione Layer Panel QGIS.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>🔗 Risorse utili</strong>
+      <a href="https://github.com/pyarchinit/dem-volume-calculator" target="_blank">Repository GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/pyarchinit/dem-volume-calculator/issues" target="_blank">Segnala un bug</a>
+      &nbsp;·&nbsp;
+      <a href="https://pyarchinit.org" target="_blank">pyarchinit.org</a>
+      &nbsp;·&nbsp;
+      <a href="https://plugins.qgis.org/plugins/pyarchinit/" target="_blank">QGIS Plugin Repository</a>
+      &nbsp;·&nbsp;
+      <a href="https://ollama.com" target="_blank">Ollama</a>
+    </div>
+
+  </main>
+</div>
+
+<!-- ================================================================
+     FOOTER
+================================================================ -->
+<footer>
+  <div class="footer-inner">
+    <p>
+      <strong>DEM Volume Calculator</strong> v1.3.0
+      &nbsp;·&nbsp;
+      Autore: <a href="https://pyarchinit.org" target="_blank">Luca Mandolesi</a>
+    </p>
+    <p>
+      Parte dell'ecosistema <a href="https://pyarchinit.org" target="_blank">pyArchInit</a>
+      — Software open source per la gestione dei dati di scavo archaeologico su QGIS
+    </p>
+    <p>
+      <a href="https://github.com/pyarchinit/dem-volume-calculator" target="_blank">GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/pyarchinit/dem-volume-calculator/issues" target="_blank">Issues</a>
+      &nbsp;·&nbsp;
+      <a href="https://plugins.qgis.org/plugins/pyarchinit/" target="_blank">QGIS Plugins</a>
+      &nbsp;·&nbsp;
+      Categoria: Raster · Plugin QGIS 3 open source
+    </p>
+  </div>
+</footer>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+  function switchTab(event, id) {
+    const btn   = event.currentTarget;
+    const group = btn.closest('.tab-container');
+    group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    group.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = group.querySelector('#tab-' + id);
+    if (panel) panel.classList.add('active');
+  }
+
+  /* Sidebar: evidenzia il link attivo durante lo scroll */
+  const sections = document.querySelectorAll('.section-anchor');
+  const links    = document.querySelectorAll('.sidebar-link');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        links.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-8% 0px -82% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
